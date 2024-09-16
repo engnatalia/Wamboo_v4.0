@@ -98,4 +98,18 @@
     <string name="h265_3gp">No es posible comprimir 3gp con H.265, cambiado a H.264</string>
     <string name="h265_avi">No es posible comprimir avi con H.265, cambiado a H.264</string>
     <string name="selected_format">Formato seleccionado:</string>
+    <string name="error_config_notif">Error al abrir la configuración de las notificaciones.</string>
+    <string name="no_app_notif">No se ha encontrado una app para manejar la configuración de las notificaciones.</string>
+    <string name="error_settings">Error al abrir la configuración de la app.</string>
+    <string name="no_app_settings">No se ha encontrado una app para manejar la configuración.</string>
+    <string name="manual_battery_config">No se ha encontrado la configuración de la batería. Por favor, ve a la configuración de la app y habilita el funcionamiento en segundo plano.</string>
+    <string name="input_rate_check">Las características del archivo de vídeo seleccionado son inusuales; la compresión puede fallar.</string>
+    <string name="update_successful">Actualización completada!</string>
+    <string name="update_failed">Fallo en la actualización. Inténtalo de nuevo más tarde.</string>
+    <string name="no_hevc">Este dispositivo no soporta H.265 (HEVC). Por favor, selecciona H.264</string>
+    <string name="corrupted_video">Característica unusual</string>
+    <string name="video_resolution_mismatch">"Parece que la resolución del vídeo (%1$dpx) no coincide con la que se seleccionó: (%2$dpx). Esto puede causar problemas de reproducción en algunos dispositivos. Te recomendamos usar el codec H.264 en lugar de H.265."</string>
+    <string name="video_h265_warning">"El vídeo está comprimido usando el codec H.265, que no es compatible con todos los dispositivos. Si el video comprimido no se puede reproducir, te recomendamos usar el codec H.264."</string>
+
+
 </resources>

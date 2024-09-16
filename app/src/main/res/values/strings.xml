@@ -97,4 +97,17 @@
     <string name="h265_avi">Not possible to compress avi using H.265, changed to H.264</string>
     <string name="no_selected_format">No resolution format</string>
     <string name="selected_format">Selected format:</string>
+    <string name="error_config_notif">Error opening notification settings.</string>
+    <string name="no_app_notif">No app found to handle notification settings.</string>
+    <string name="error_settings">Error opening app settings.</string>
+    <string name="no_app_settings">No app found to handle app settings.</string>
+    <string name="manual_battery_config">Battery Setting not found in this device. Please manually go to setting and enable background task.</string>
+    <string name="input_rate_check">The selected video file has unusual features: compression may fail</string>
+    <string name="update_successful">Update completed successfully!</string>
+    <string name="update_failed">Update failed. Please try again later.</string>
+    <string name="no_hevc">H.265 (HEVC) is NOT supported on this device. Please, select H.264 </string>
+    <string name="corrupted_video">Unusual feature</string>
+
+    <string name="video_h265_warning">"The video was compressed using the codec H.265, which is not compatible with all devices. If you had issues with the compressed video, use the H.264 codec."</string>
+    <string name="video_resolution_mismatch">"The video resolution is (%1$dpx), which is different that the selected one: (%2$dpx). This may cause issues with the video in some devices. If the compressed video can't be played, try the H.264 codec instead of H.265"</string>
 </resources>

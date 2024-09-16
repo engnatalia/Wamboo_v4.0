@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Natalia Molinero Mingorance
+ * Copyright (c) 2024 Natalia Molinero Mingorance
  * All rights reserved.
  */
 
@@ -10,8 +10,13 @@ import android.app.*
 import android.content.*
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.media.MediaCodecList
+import android.media.MediaMetadataRetriever
+import android.media.MediaPlayer
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -28,16 +33,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.work.*
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegKitConfig
+import com.arthenica.ffmpegkit.FFmpegSession
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.MediaInformationSession
+import com.github.mikephil.charting.BuildConfig
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.*
 import wamboo.example.videocompressor.databinding.FragmentHomeBinding
 import wamboo.example.videocompressor.workers.ForegroundWorker
@@ -48,7 +59,14 @@ import java.util.*
 import com.google.android.ump.*
 import com.google.android.ump.ConsentInformation.OnConsentInfoUpdateFailureListener
 import com.google.android.ump.ConsentInformation.OnConsentInfoUpdateSuccessListener
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
+
 private const val REQUEST_PICK_VIDEO = 1
+private const val UPDATE_REQUEST_CODE = 1001
+
 @Suppress("DEPRECATION")
 class HomeFragment : Fragment() {
     private lateinit var mAdView: AdView
@@ -122,6 +140,11 @@ class HomeFragment : Fragment() {
                     // VideoView, Start the VideoView to play that video
                     binding.videoView2.start()
                     binding.videoView2.isVisible=true
+                    // Check if the video is corrupted
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+
+                        checkVideoCorruption(requireContext(), Uri.parse(compressedFilePath))
+                    }
                     if (videoResolution == videoResolutionInit) {
                             binding.quality.text =""
                             binding.quality.visibility= View.VISIBLE
@@ -152,6 +175,7 @@ class HomeFragment : Fragment() {
             }
 
         }
+
     }
 
     private val videoCompressionProgressReceiver = object : BroadcastReceiver() {
@@ -175,6 +199,88 @@ class HomeFragment : Fragment() {
             }
         }
     }
+
+
+    private fun checkVideoCorruption(context: Context, filePath: Uri) {
+        if (filePath != null) {
+
+            val mediaInformationSession  = FFprobeKit.getMediaInformation(
+                FFmpegKitConfig.getSafParameterForRead(
+                    activity,
+                    filePath
+                )
+            )
+
+            videoWidth = mediaInformation.mediaInformation.streams[0].width.toString()
+            videoHeight = mediaInformation.mediaInformation.streams[0].height.toString()
+            // Check that the session was successful and get info from the video
+            if (mediaInformationSession != null  ) {
+                val mediaInformation = mediaInformationSession.mediaInformation
+                val streams = mediaInformation?.streams
+
+                if (streams != null) {
+                    // Iterate the streams to find the one with "codec_type = video"
+                    for (stream in streams) {
+
+                        if (stream.getStringProperty("codec_type") == "video") {
+                            // Get the coded_width
+                            val codedWidth = stream.getStringProperty("coded_width")
+                            if (codedWidth != null) {
+                                Log.d("VideoInfo", "Coded Width: $codedWidth")
+
+                                // Compare coded_width with the width selected for the compression
+                                if (codedWidth == videoWidth || codedWidth == videoHeight) {
+                                    Log.d("Comparison", "La resolución coincide con la seleccionada.")
+
+                                } else {
+                                    Log.d(
+                                        "Comparison",
+                                        "La resolución no coincide con la seleccionada."
+                                    )
+                                    val codecName = stream.getStringProperty("codec_name")
+                                    val codedWidth = codedWidth?.toIntOrNull() ?: 0
+                                    val videoWidth = videoWidth?.toIntOrNull() ?: 0
+                                    val alertMessage = getString(
+                                        R.string.video_resolution_mismatch,
+                                        codedWidth,
+                                        videoWidth
+                                    )
+                                    AlertDialog.Builder(requireActivity()).apply {
+                                        setTitle(getString(R.string.corrupted_video))
+                                        setMessage(alertMessage)
+                                        setPositiveButton("OK") { _, _ -> }
+                                        setCancelable(false)
+                                    }.create().show()
+                                    // If codec is H.265, suggest to change to H.264
+                                    if (codecName == "hevc") {
+                                        val alertMessage = getString(R.string.video_h265_warning)
+
+
+
+                                        AlertDialog.Builder(requireActivity()).apply {
+                                            setTitle(getString(R.string.corrupted_video))
+                                            setMessage(alertMessage)
+                                            setPositiveButton("OK") { _, _ -> }
+                                            setCancelable(false)
+                                        }.create().show()
+                                    }
+                                }
+                            } else {
+                                Log.e("VideoInfo", "Coded Width no encontrado.")
+                            }
+                            break // End the loop once the stream is found
+                        }
+                    }
+                } else {
+                    Log.e("MediaInformation", "No se encontraron streams en la información del video.")
+                }
+            } else {
+                Log.e("FFprobeKit", "Error al obtener la información del video.")
+            }
+        }
+    }
+
+
     private fun calculateQuality() {
         if (activity != null && videoUrl != null && compressedFilePath.isNotEmpty()) {
             binding.quality.visibility = View.GONE
@@ -182,7 +288,6 @@ class HomeFragment : Fragment() {
             binding.checkboxQuality.visibility = View.GONE
             binding.quality.text = ""
 
-            // Check the FFmpeg command
             val command2 = "-i ${
                 FFmpegKitConfig.getSafParameterForRead(
                     activity,
@@ -194,91 +299,95 @@ class HomeFragment : Fragment() {
                     Uri.parse(compressedFilePath)
                 )
             } -lavfi \"ssim;[0:v][1:v]psnr\" -f null -"
+
             Log.d(TAG, "Comando FFmpeg: $command2")
 
-            // Show a proggress message
             Toast.makeText(
                 context,
                 Html.fromHtml("<font color='red' ><b>" + getString(R.string.quality_progress) + "</b></font>"),
                 Toast.LENGTH_SHORT
             ).show()
 
-            try {
-                // Run the FFmpeg command
-                val hola = FFmpegKit.execute(command2)
-
-                // Verificar los logs de FFmpeg
-                val indexSsim = hola.logs.size
-                val ssimLine = hola.logs.get(indexSsim - 2)
-                val ssim = ssimLine.message.substringAfter("All:").substringBefore("(")
-                val quality: Double
-                val msg1: String
-                if (ssim.contains("0.")) {
-                    quality = ((1 - ssim.toDouble()) * 100).toBigDecimal().setScale(
-                        2,
-                        RoundingMode.UP
-                    ).toDouble()
-                    binding.quality.text = buildString {
-                        append(quality.toString())
-                        append("%")
-                    }
-                    msg1 = getString(R.string.quality_completed) + " " + quality.toString() + "%"
-                } else {
-                    binding.quality.text = getString(R.string.poor_quality)
-                    msg1 = getString(R.string.poor_quality)
-                }
-                AlertDialog.Builder(requireActivity()).apply {
-                    setMessage(msg1).setPositiveButton("OK") { _, _ -> (requireActivity()) }
-                }.create().show()
-                binding.quality.visibility = View.VISIBLE
-                binding.qualityDescription.visibility = View.VISIBLE
-                binding.checkboxQuality.visibility = View.VISIBLE
-            } catch (e: Exception) {
-                // Handle the FFmpeg running errors
-                Log.e(TAG, "Error al ejecutar FFmpeg: ${e.message}", e)
-
-                // Mostrar un mensaje de error
-                val msg1 = getString(R.string.quality_error)
-                val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:contact.harmonyvalley@gmail.com")
-                    putExtra(Intent.EXTRA_SUBJECT, "Quality Error")
-                    putExtra(Intent.EXTRA_TEXT, msg1)
-                }
-
-                AlertDialog.Builder(requireActivity()).apply {
-                    setMessage(msg1)
-                    setPositiveButton("OK") { _, _ ->
-                        // Try to open the mail app
-                        try {
-                            startActivity(emailIntent)
-                        } catch (e: Exception) {
-                            // If mail app can't open, show a message
-                            Toast.makeText(context, R.string.quality_error, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }.create().show()
-            }
-        } else {
-            // Handle if activity, videoUrl o compressedFilePath rare null of empty
-            val msg1 = getString(R.string.quality_error)
-            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:contact.harmonyvalley@gmail.com")
-                putExtra(Intent.EXTRA_SUBJECT, "Quality Error")
-                putExtra(Intent.EXTRA_TEXT, msg1)
-            }
-
-            AlertDialog.Builder(requireActivity()).apply {
-                setMessage(msg1)
-                setPositiveButton("OK") { _, _ ->
-                    // Try to open the mail app
-                    try {
-                        startActivity(emailIntent)
+            // We use AsyncTask to run the command in a background thread
+            object : AsyncTask<Void, Void, Double?>() {
+                override fun doInBackground(vararg params: Void?): Double? {
+                    return try {
+                        val hola = FFmpegKit.execute(command2)
+                        val indexSsim = hola.logs.size
+                        val ssimLine = hola.logs.get(indexSsim - 2)
+                        val ssim = ssimLine.message.substringAfter("All:").substringBefore("(")
+                        if (ssim.contains("0.")) {
+                            (1 - ssim.toDouble()) * 100
+                        } else null
                     } catch (e: Exception) {
-                        // If mail app can't open, show a message
-                        Toast.makeText(context, R.string.quality_error, Toast.LENGTH_SHORT).show()
+                        Log.e(TAG, "Error al ejecutar FFmpeg: ${e.message}", e)
+                        null
                     }
                 }
-            }.create().show()
+
+                override fun onPostExecute(result: Double?) {
+                    if (result != null) {
+                        val quality = result.toBigDecimal().setScale(2, RoundingMode.UP).toDouble()
+                        binding.quality.text = "$quality%"
+                        AlertDialog.Builder(requireActivity()).apply {
+                            setMessage(getString(R.string.quality_completed) + " " + quality + "%")
+                            setPositiveButton("OK") { _, _ -> }
+                            setCancelable(false)
+                        }.create().show()
+                    } else {
+                        binding.quality.text = getString(R.string.poor_quality)
+                        AlertDialog.Builder(requireActivity()).apply {
+                            setMessage(getString(R.string.poor_quality))
+                            setPositiveButton("OK") { _, _ -> }
+                            setCancelable(false)
+                        }.create().show()
+                    }
+
+                    binding.quality.visibility = View.VISIBLE
+                    binding.qualityDescription.visibility = View.VISIBLE
+                    binding.checkboxQuality.visibility = View.VISIBLE
+                }
+            }.execute()
+        }
+    }
+
+    private fun checkForInAppUpdate() {
+        // Create an AppUpdateManager instance
+        val appUpdateManager = AppUpdateManagerFactory.create(requireActivity())
+        // Get info about the available update
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            Log.d("InAppUpdate", "Update info received: ${appUpdateInfo.updateAvailability()}")
+            // Check if there is an available update and if the type is allowed
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                Log.d("InAppUpdate", "Update available and allowed")
+
+            // Initiate the update process
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    requireActivity(),
+                    UPDATE_REQUEST_CODE
+                )
+            } else {
+                Log.d("InAppUpdate", "No update available or not allowed")
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("InAppUpdate", "Failed to check for updates", exception)
+
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == UPDATE_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.d("InAppUpdate", "Update completed successfully")
+                Toast.makeText(requireActivity(), getString(R.string.update_successful), Toast.LENGTH_LONG).show()
+            } else {
+                Log.e("InAppUpdate", "Update failed with resultCode: $resultCode")
+                Toast.makeText(requireActivity(), getString(R.string.update_failed), Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -321,6 +430,7 @@ class HomeFragment : Fragment() {
                 binding.deleteVideo.visibility = View.VISIBLE
                 binding.videoView1.start()
                 binding.videoView2.start()
+
             }
         }
         binding.pickVideo.visibility = View.VISIBLE
@@ -379,6 +489,7 @@ class HomeFragment : Fragment() {
                     append("%")
                 }
             }
+
         }
 
 
@@ -400,11 +511,18 @@ class HomeFragment : Fragment() {
         )
         editor = pref.edit()
 
+        // Progress receiver register
         requireContext().registerReceiver(
-            videoCompressionProgressReceiver, IntentFilter(Constants.WORK_PROGRESS_ACTION)
+            videoCompressionProgressReceiver,
+            IntentFilter(Constants.WORK_PROGRESS_ACTION),
+            Context.RECEIVER_EXPORTED
         )
+
+// Finalization receiver register
         requireContext().registerReceiver(
-            videoCompressionCompletedReceiver, IntentFilter(Constants.WORK_COMPLETED_ACTION)
+            videoCompressionCompletedReceiver,
+            IntentFilter(Constants.WORK_COMPLETED_ACTION),
+            Context.RECEIVER_EXPORTED
         )
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
@@ -485,6 +603,7 @@ class HomeFragment : Fragment() {
         if (view != null) {
             super.onViewCreated(view, savedInstanceState)
             super.onViewCreated(view, savedInstanceState)
+            checkForInAppUpdate()
             // Set tag for under age of consent. false means users are not under age.
             val params = ConsentRequestParameters.Builder()
                 .setTagForUnderAgeOfConsent(false)
@@ -533,17 +652,59 @@ class HomeFragment : Fragment() {
                     requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.createNotificationChannel(channel)
 
-                // Ask the user to allow your app to show notifications
-                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
-                startActivity(intent)
-            } else {
-                // Ask the user to allow your app to show notifications
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                intent.data = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-                startActivity(intent)
-            }
+                // Open the notification configuration of the app
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, requireActivity().packageName)
+                }
+                Log.d("IntentDebug", "Intent: ${intent.action} ${intent.data}")
 
+                // Verify is there is an activity available to manage the Intent
+                if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                    try {
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(
+                            requireActivity(),
+                            getString(R.string.error_config_notif),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    Toast.makeText(
+                        requireActivity(),
+                        getString(R.string.no_app_notif),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            } else {
+                // Open the app details for versions older than Android 0
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+                }
+
+
+                // Verify is there is an activity available to manage the Intent
+                if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                    try {
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(
+                            requireActivity(),
+                            getString(R.string.error_settings),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    Toast.makeText(
+                        requireActivity(),
+                        getString(R.string. no_app_settings),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
     }
@@ -653,17 +814,15 @@ class HomeFragment : Fragment() {
 
     fun openBatteryUsagePage(ctx: Context) {
         val powerUsageIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-
-
         powerUsageIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        val uri = Uri.fromParts("package", requireActivity().packageName, null)
+        val uri = Uri.fromParts("package", ctx.packageName, null)
         powerUsageIntent.data = uri
         try {
-            startActivity(powerUsageIntent)
+            ctx.startActivity(powerUsageIntent)
         } catch (e: Exception) {
             Toast.makeText(
                 ctx,
-                "Battery Setting not found in this device please manually go to setting and enable background task",
+                getString(R.string.manual_battery_config),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -1246,6 +1405,14 @@ private fun resetViews() {
                                 getString(R.string.selected_codec) + " " + showCodec,
                                 Toast.LENGTH_SHORT
                             ).show()
+                            if (! isHEVCCodecSupported()) {
+                                // The device supports H.265
+                                AlertDialog.Builder(requireActivity()).apply {
+                                    setMessage(getString(R.string.no_hevc))
+                                    setPositiveButton("OK") { _, _ -> }
+                                    setCancelable(false)
+                                }.create().show()
+                            }
                         }
                     }
                 }
@@ -1259,6 +1426,24 @@ private fun resetViews() {
         binding.spinner4.visibility=View.VISIBLE
         return binding.spinner4
 
+    }
+    fun isHEVCCodecSupported(): Boolean {
+        val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
+        val codecs = codecList.codecInfos
+
+        for (codecInfo in codecs) {
+            // Check if the codec is decoder (not encoder)
+            if (!codecInfo.isEncoder) {
+                val types = codecInfo.supportedTypes
+                for (type in types) {
+                    // Check if the supported type is H.265 (HEVC)
+                    if (type.equals("video/hevc", ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
     }
  private fun visibleViews() {
 
@@ -1281,7 +1466,25 @@ private fun resetViews() {
 
 
     }
+    private fun isFrameRateAbove60(frameRate: String): Boolean {
+        // Split the frame rate string into numerator and denominator
+        val parts = frameRate.split("/")
 
+        // Check if the frame rate string is in the expected format
+        if (parts.size != 2) {
+            throw IllegalArgumentException("Invalid frame rate format")
+        }
+
+        // Parse numerator and denominator
+        val numerator = parts[0].toIntOrNull() ?: return false
+        val denominator = parts[1].toIntOrNull() ?: return false
+
+        // Calculate the frame rate as a floating-point number
+        val frameRateValue = numerator.toDouble() / denominator.toDouble()
+
+        // Check if the frame rate is greater than 60
+        return frameRateValue > 60
+    }
 
     /* This code is using the registerForActivityResult method to launch an activity for a result,
 specifically to select a video file. If the result code is Activity.RESULT_OK, it means a video has been successfully selected.
@@ -1321,8 +1524,21 @@ If there is an error in the process, an error message is displayed to the user v
                                     videoUrl
                                 )
                             )
-
-
+                            var rate = mediaInformation.mediaInformation.streams[0].realFrameRate.toString()
+                            if (rate== null || rate == "0/0")
+                            {
+                                rate = mediaInformation.mediaInformation.streams[1].realFrameRate.toString()
+                            }
+                            // Check if the frame rate is above 60
+                            if (isFrameRateAbove60(rate)) {
+                                val msg1 = getString(R.string.input_rate_check)
+                                AlertDialog.Builder(requireActivity()).apply {
+                                    msg1
+                                    setMessage(msg1).setPositiveButton(
+                                        "OK"
+                                    ) { _, _ -> (requireActivity()) }
+                                }.create().show()
+                            }
                             videoHeight = mediaInformation.mediaInformation.streams[0].height.toString()
                             videoWidth = mediaInformation.mediaInformation.streams[0].width.toString()
                             var side = mediaInformation.mediaInformation.streams[0].getStringProperty("side_data_list")
