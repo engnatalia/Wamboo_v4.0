@@ -107,7 +107,7 @@
     <string name="update_failed">Update failed. Please try again later.</string>
     <string name="no_hevc">H.265 (HEVC) is NOT supported on this device. Please, select H.264 </string>
     <string name="corrupted_video">Unusual feature</string>
-
+    <string name="cancel_compression">Stop Compression</string>
     <string name="video_h265_warning">"The video was compressed using the codec H.265, which is not compatible with all devices. If you had issues with the compressed video, use the H.264 codec."</string>
     <string name="video_resolution_mismatch">"The video resolution is (%1$dpx), which is different that the selected one: (%2$dpx). This may cause issues with the video in some devices. If the compressed video can't be played, try the H.264 codec instead of H.265"</string>
-</resources>
+ </resources>

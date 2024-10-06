@@ -15,16 +15,24 @@
           <theme>@style/Theme.VideoCompressor</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/progress_dialog_layout.xml">
+        <config>
+          <theme>@style/Theme.VideoCompressor</theme>
+        </config>
+      </layout>
     </layouts>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8657652c-175c-4ae3-8120-7be546b5f0c9" name="Changes" comment="-Compatible with Android 14 and backwards, improved quality pop-up and calculation, detection of corrupted videos, detects HEVC and warning">
+    <list default="true" id="8657652c-175c-4ae3-8120-7be546b5f0c9" name="Changes" comment="new version 4.0 created">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-es/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-es/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +124,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Android App.app.executor": "Debug",
+    "Android App.app.executor": "Run",
     "BundleExportedModule": "VideoCompressor.app",
     "ExportBundle.BundlePathForVideoCompressor.app": "D:\\HV\\Papers\\GOAL 1\\Paper 4\\Wamboo MVP\\Version3.3",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
@@ -127,7 +135,7 @@
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/HV_v2/Apps/Eco-compressor/Version4.0/Wamboo_v4.0",
+    "last_opened_file_path": "D:/HV_v2/Apps/Wamboo Cam/v2.0/WambooCam_v2.0",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.17",
     "project.structure.side.proportion": "0.2",
@@ -591,7 +599,7 @@
       <option name="project" value="LOCAL" />
       <updated>1693842659048</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -610,7 +618,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
-    <MESSAGE value="changed Home design, added database and history fragment with initial charts" />
     <MESSAGE value="replaced radio buttons by spinner and hide video when showing resulta" />
     <MESSAGE value="fixed charts to show pollution and size reduction" />
     <MESSAGE value="added car icon and equivalent driven km in chart views" />
@@ -635,7 +642,8 @@
     <MESSAGE value="added license and readme info to share publicly" />
     <MESSAGE value="Corrected units in the initially estimated size." />
     <MESSAGE value="-Compatible with Android 14 and backwards, improved quality pop-up and calculation, detection of corrupted videos, detects HEVC and warning" />
-    <option name="LAST_COMMIT_MESSAGE" value="-Compatible with Android 14 and backwards, improved quality pop-up and calculation, detection of corrupted videos, detects HEVC and warning" />
+    <MESSAGE value="new version 4.0 created" />
+    <option name="LAST_COMMIT_MESSAGE" value="new version 4.0 created" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -667,52 +675,81 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>331</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="340" />
+          <line>780</line>
+          <option name="timeStamp" value="220" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>328</line>
-          <option name="timeStamp" value="342" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>204</line>
-          <option name="timeStamp" value="440" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>168</line>
-          <option name="timeStamp" value="443" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>247</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="448" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>259</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="449" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>242</line>
-          <option name="timeStamp" value="450" />
+          <line>111</line>
+          <option name="timeStamp" value="221" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
           <line>143</line>
-          <option name="timeStamp" value="451" />
+          <option name="timeStamp" value="222" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>137</line>
+          <option name="timeStamp" value="223" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>408</line>
+          <option name="timeStamp" value="224" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>423</line>
+          <option name="timeStamp" value="225" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>424</line>
+          <option name="timeStamp" value="226" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>428</line>
+          <option name="timeStamp" value="227" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>431</line>
+          <option name="timeStamp" value="228" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>633</line>
+          <option name="timeStamp" value="229" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>963</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="230" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>1150</line>
+          <option name="timeStamp" value="231" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>1176</line>
+          <option name="timeStamp" value="232" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>1228</line>
+          <option name="timeStamp" value="233" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
+          <line>1515</line>
+          <option name="timeStamp" value="234" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

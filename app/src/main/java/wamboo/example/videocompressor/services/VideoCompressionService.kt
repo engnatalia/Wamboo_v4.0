@@ -59,7 +59,6 @@ class VideoCompressionService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val videoUri = intent?.getStringExtra(ForegroundWorker.VideoURI)
         val selectedtype = intent?.getStringExtra(ForegroundWorker.SELECTION_TYPE)
@@ -118,7 +117,6 @@ class VideoCompressionService : Service() {
         startForeground(NOTIFICATION_ID, builder2.build())
     }
 
-
     /* This function compresses a video file. It uses the FFmpeg library to perform the compression.
      The compression format is determined by the selectedtype variable, which can be "H.264", "H.265", or "VP9".
      A progress dialog is displayed while the compression is in progress.
@@ -130,7 +128,6 @@ class VideoCompressionService : Service() {
      The command is then executed by the FFmpeg library.
      If the compression is successful, the statistics of the compression, such as the initial size,
       conversion time, and compressed size, are displayed in a text view. */
-
     private fun compressVideo(
         videoUri: Uri,
         selectedtype: String,
@@ -150,8 +147,6 @@ class VideoCompressionService : Service() {
         val fileExtn = "."+selectedformat
         val bm = getSystemService(BATTERY_SERVICE) as BatteryManager
         val initcapacity: Int = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-
-
             // With introduction of scoped storage in Android Q the primitive method gives error
             // So, it is recommended to use the below method to create a video file in storage.
             val valuesVideos = ContentValues()
@@ -365,7 +360,6 @@ class VideoCompressionService : Service() {
                 updateNotificationMessage(returnCode)
 
             }, {
-
                 //handle FFmpegKit logs
                 //Log.d("Logs", it.toString())
                 // CALLED WHEN SESSION PRINTS LOGS
@@ -391,6 +385,7 @@ class VideoCompressionService : Service() {
                 val intent2 = Intent(Constants.WORK_PROGRESS_ACTION)
                 intent2.putExtra(HomeFragment.RETURN_CODE, returnCode.toString())
                 intent2.putExtra("percentage", msg3)
+                intent2.putExtra(HomeFragment.URI_PATH, uriPath.toString())
                 sendBroadcast(intent2)
             }
         )

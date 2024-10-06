@@ -63,6 +63,7 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import kotlin.system.exitProcess
 
 private const val REQUEST_PICK_VIDEO = 1
 private const val UPDATE_REQUEST_CODE = 1001
@@ -133,6 +134,7 @@ class HomeFragment : Fragment() {
                 if (compressedFilePath != intent.getStringExtra(URI_PATH)){
 
                     compressedFilePath = intent.getStringExtra(URI_PATH).toString()
+                }
                     binding.videoView2.setVideoURI(Uri.parse(compressedFilePath))
 
                     // after successful retrieval of the video and properly
@@ -141,10 +143,8 @@ class HomeFragment : Fragment() {
                     binding.videoView2.start()
                     binding.videoView2.isVisible=true
                     // Check if the video is corrupted
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+                    checkVideoCorruption(requireContext(), Uri.parse(compressedFilePath))
 
-                        checkVideoCorruption(requireContext(), Uri.parse(compressedFilePath))
-                    }
                     if (videoResolution == videoResolutionInit) {
                             binding.quality.text =""
                             binding.quality.visibility= View.VISIBLE
@@ -171,7 +171,7 @@ class HomeFragment : Fragment() {
                             binding.checkboxQuality.visibility= View.GONE
                             binding.quality.text =""
                         }
-                }
+
             }
 
         }
@@ -182,7 +182,7 @@ class HomeFragment : Fragment() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
             if (intent?.action == Constants.WORK_PROGRESS_ACTION) {
-
+                compressedFilePath = intent.getStringExtra(URI_PATH).toString()
                 // Do something when the WorkManager completes its work
                 // For example, update UI, show a notification, etc.
                 if (intent.getStringExtra(RETURN_CODE).equals("0")) { //0 means success
@@ -516,7 +516,7 @@ class HomeFragment : Fragment() {
             videoCompressionProgressReceiver,
             IntentFilter(Constants.WORK_PROGRESS_ACTION),
             Context.RECEIVER_EXPORTED
-        )
+       )
 
 // Finalization receiver register
         requireContext().registerReceiver(
@@ -602,7 +602,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (view != null) {
             super.onViewCreated(view, savedInstanceState)
-            super.onViewCreated(view, savedInstanceState)
             checkForInAppUpdate()
             // Set tag for under age of consent. false means users are not under age.
             val params = ConsentRequestParameters.Builder()
@@ -627,7 +626,7 @@ class HomeFragment : Fragment() {
                     // Handle the error.
                 })
         }
-        loadAd()
+       loadAd()
         //checkNotificationPermission()
         checkCameraPermission()
         initUI()
@@ -635,8 +634,7 @@ class HomeFragment : Fragment() {
         videoView2 = binding.root.findViewById(R.id.videoView2)
         showLoader()
     }
-
-    private fun checkNotificationPermission() {
+     private fun checkNotificationPermission() {
 
         val notificationManager =
             requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -747,7 +745,6 @@ class HomeFragment : Fragment() {
         if (progressDialog.isShowing) {
             progressDialog.dismiss()
         }
-
         Log.d("service", "OnResume")
         showDataFromPref()
     }
@@ -768,12 +765,77 @@ class HomeFragment : Fragment() {
             requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val dialogView = inflater.inflate(R.layout.progress_dialog_layout, null)
         builder.setView(dialogView)
-        builder.setCancelable(false)
+            .setCancelable(true)
+            .setNegativeButton(getString(R.string.cancel_compression)) { dialog, which ->
+                progressDialog.dismiss()
+                deleteVideo()
+                restartApp(requireContext())
+            }
+
         progressDialog = builder.create()
+
 
     }
 
-    private fun loadAd() {
+    fun deleteVideo() {
+        val compressedVideoFilePath = getRealPathFromURI(requireContext(), Uri.parse(compressedFilePath))
+
+        if (compressedVideoFilePath != null) {
+            val compressedVideoFile = File(compressedVideoFilePath)
+
+            if (compressedVideoFile.exists()) {
+                val deleted = compressedVideoFile.delete()
+                if (deleted) {
+                    Log.d("DeleteVideo", "El archivo de video comprimido ha sido eliminado.")
+                } else {
+                    Log.e("DeleteVideo", "Error al eliminar el archivo de video.")
+                }
+            } else {
+                Log.d("DeleteVideo", "El archivo de video comprimido no existe.")
+            }
+        } else {
+            Log.e("DeleteVideo", "No se pudo obtener la ruta real del archivo desde la URI.")
+        }
+    }
+
+    fun getRealPathFromURI(context: Context, uri: Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = context.contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                    result = it.getString(columnIndex)
+                }
+            }
+        } else if (uri.scheme == "file") {
+            result = uri.path
+        }
+        return result
+    }
+
+    fun restartApp(context: Context) {
+        // Create an intent to restart the app
+
+
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+
+        // Make sure the intent is not null
+        if (intent != null) {
+
+            context.startActivity(intent)
+        } else {
+            // Handle if the inten is null (very unlikely)
+            Log.e("RestartApp", "Intent was null, unable to restart app.")
+        }
+
+        // End all the previous activities and exit the app
+        exitProcess(0)
+    }
+
+        private fun loadAd() {
         MobileAds.initialize(requireActivity()) {}
         val adRequest = AdRequest.Builder().build()
         mAdView = binding.root.findViewById(R.id.adView)
@@ -1072,7 +1134,7 @@ class HomeFragment : Fragment() {
             binding.checkboxQuality.isChecked = false
             if (videoUrl != null) {
 
-				compressVideo.isVisible = false													 
+				compressVideo.isVisible = false
                 val value =
                     fileSize(videoUrl!!.length(requireActivity().contentResolver))
                 editor.putString(INITIAL_SIZE, value)
@@ -1448,7 +1510,7 @@ private fun resetViews() {
  private fun visibleViews() {
 
      with(binding) {
-            pickVideo.isVisible = false
+            pickVideo.isVisible = true
             videoView.isVisible = true
             videoView1.visibility = View.GONE
             videoView2.visibility = View.GONE

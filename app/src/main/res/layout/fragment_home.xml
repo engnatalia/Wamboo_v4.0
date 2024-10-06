@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/audio"
                 android:contentDescription="@string/audio"
-				android:visibility="gone"/>
+                android:visibility="gone"/>
 
 
             <Spinner
@@ -144,8 +144,8 @@
                 android:fontFamily="@font/bauhausregular"
                 android:text="@string/compress_video"
                 android:textColor="@color/white"
-                android:textFontWeight="700" 
-				android:visibility="gone"/>
+                android:textFontWeight="700"
+                android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/shareVideo"
                 android:layout_width="wrap_content"
