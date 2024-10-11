@@ -38,15 +38,27 @@
                 android:checked="false"
                 android:fontFamily="@font/bauhausitalic"
                 android:text="@string/background" />
-
-            <VideoView
-                android:id="@+id/videoView"
+            <!-- FrameLayout for VideoView -->
+            <FrameLayout
+                android:id="@+id/videoContainer"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:visibility="gone"
-                android:contentDescription="video view"/>
+                android:layout_height="wrap_content">
+
+                <VideoView
+                    android:id="@+id/videoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone"
+                    android:contentDescription="video view"/>
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/videoContainer2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
             <VideoView
                 android:id="@+id/videoView1"
                 android:layout_width="match_parent"
@@ -55,6 +67,12 @@
                 android:layout_marginTop="10dp"
                 android:visibility="gone"
                 android:contentDescription="video view"/>
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/videoContainer3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
             <VideoView
                 android:id="@+id/videoView2"
                 android:layout_width="wrap_content"
@@ -63,6 +81,8 @@
                 android:layout_marginTop="10dp"
                 android:visibility="gone"
                 android:contentDescription="video view"/>
+            </FrameLayout>
+
             <CheckBox android:id="@+id/checkbox_audio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -79,30 +99,7 @@
                 android:layout_marginEnd="5dp"
                 android:textSize="30sp"
                 android:visibility="gone"/>
-            <TextView
-                android:id="@+id/dataTV"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:textColor="@color/teal_700"
-                android:textSize="15sp"
-                android:visibility="gone"/>
-            <TextView
-                android:id="@+id/dataTV2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:textColor="@color/teal_700"
-                android:textSize="20sp"
-                android:visibility="gone"/>
-            <TextView
-                android:id="@+id/dataTV3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:textColor="@color/teal_700"
-                android:textSize="15sp"
-                android:visibility="gone"/>
+
             <!--<TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -145,6 +142,30 @@
                 android:text="@string/compress_video"
                 android:textColor="@color/white"
                 android:textFontWeight="700"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/dataTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:textColor="@color/teal_700"
+                android:textSize="15sp"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/dataTV2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:textColor="@color/teal_700"
+                android:textSize="20sp"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/dataTV3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:textColor="@color/teal_700"
+                android:textSize="15sp"
                 android:visibility="gone"/>
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/shareVideo"

@@ -19,6 +19,8 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.MediaStore
 import android.provider.Settings
@@ -135,42 +137,68 @@ class HomeFragment : Fragment() {
 
                     compressedFilePath = intent.getStringExtra(URI_PATH).toString()
                 }
-                    binding.videoView2.setVideoURI(Uri.parse(compressedFilePath))
+                // after successful retrieval of the video and properly
+                // setting up the retried video uri in
+                binding.videoView2.setVideoURI(Uri.parse(compressedFilePath))
 
-                    // after successful retrieval of the video and properly
-                    // setting up the retried video uri in
-                    // VideoView, Start the VideoView to play that video
+
+
+                // Configure VideoView and make the controls visible when it's ready
+                binding.videoView2.visibility = View.VISIBLE
+
+                // Listener to know when the video is ready to play
+                binding.videoView2.setOnPreparedListener {
+
+                    val mediaController2 = MediaController(requireActivity())
+
+                    mediaController2.setAnchorView(binding.videoView2)
+
+                    mediaController2.scaleY = 0.5f  // vertical scale, 0.5 times its original size
+                    mediaController2.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
+
+
+                    // Apply customized background
+                    mediaController2.setBackgroundResource(R.drawable.rounded_media_controller)
+
+                    binding.videoView2.setMediaController(mediaController2)
                     binding.videoView2.start()
-                    binding.videoView2.isVisible=true
-                    // Check if the video is corrupted
-                    checkVideoCorruption(requireContext(), Uri.parse(compressedFilePath))
+                    mediaController2.show(0)
+                    // Forze MediaController disappear after 3 seconds (3000 ms)
 
-                    if (videoResolution == videoResolutionInit) {
-                            binding.quality.text =""
-                            binding.quality.visibility= View.VISIBLE
-                            binding.qualityDescription.visibility= View.VISIBLE
-                            binding.checkboxQuality.visibility= View.VISIBLE
-                            binding.checkboxQuality.setOnCheckedChangeListener{ _, _ ->
-                                val checked: Boolean = binding.checkboxQuality.isChecked
-                                if (checked) {
-                                    /*val snack = Snackbar.make(binding.compressVideo,getString(R.string.waiting),Toast.LENGTH_SHORT)
-                                    snack.setAnchorView(binding.compressVideo)
-                                    snack.show()*/
+                    val handler = Handler(Looper.getMainLooper())
+                    handler.postDelayed({
+                        mediaController2.hide()  // Hide MediaController after 3 seconds
+                    }, 3000)  // Timne in miliseconds
+                }
+                // Check if the video is corrupted
+                checkVideoCorruption(requireContext(), Uri.parse(compressedFilePath))
+
+                if (videoResolution == videoResolutionInit) {
+                    binding.quality.text =""
+                    binding.quality.visibility= View.VISIBLE
+                    binding.qualityDescription.visibility= View.VISIBLE
+                    binding.checkboxQuality.visibility= View.VISIBLE
+                    binding.checkboxQuality.setOnCheckedChangeListener{ _, _ ->
+                        val checked: Boolean = binding.checkboxQuality.isChecked
+                        if (checked) {
+                            /*val snack = Snackbar.make(binding.compressVideo,getString(R.string.waiting),Toast.LENGTH_SHORT)
+                            snack.setAnchorView(binding.compressVideo)
+                            snack.show()*/
 
 
 
-                                    calculateQuality()
+                            calculateQuality()
 
-                                }
-
-
-                            }
-                        } else {
-                            binding.quality.visibility= View.GONE
-                            binding.qualityDescription.visibility= View.GONE
-                            binding.checkboxQuality.visibility= View.GONE
-                            binding.quality.text =""
                         }
+
+
+                    }
+                } else {
+                    binding.quality.visibility= View.GONE
+                    binding.qualityDescription.visibility= View.GONE
+                    binding.checkboxQuality.visibility= View.GONE
+                    binding.quality.text =""
+                }
 
             }
 
@@ -363,7 +391,7 @@ class HomeFragment : Fragment() {
                 appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                 Log.d("InAppUpdate", "Update available and allowed")
 
-            // Initiate the update process
+                // Initiate the update process
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
                     AppUpdateType.IMMEDIATE,
@@ -416,20 +444,96 @@ class HomeFragment : Fragment() {
             binding.dataTV.visibility=View.GONE
             binding.dataTV2.visibility=View.GONE
             binding.dataTV3.visibility=View.GONE
-            }
+        }
         when (videoUrl) {
             null -> {
                 binding.videoView1.visibility = View.GONE
                 binding.deleteVideo.visibility = View.GONE
+                // Configure VideoView and make the controls visible when it's ready
                 binding.videoView2.visibility = View.VISIBLE
-                binding.videoView2.start()
+
+                // Listener to know when the video is ready to play
+                binding.videoView2.setOnPreparedListener {
+
+                    val mediaController2 = MediaController(requireActivity())
+
+                    mediaController2.setAnchorView(binding.videoView2)
+
+                    mediaController2.scaleY = 0.5f  // vertical scale, 0.5 times its original size
+                    mediaController2.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
+
+
+                    // Apply customized background
+                    mediaController2.setBackgroundResource(R.drawable.rounded_media_controller)
+
+                    binding.videoView2.setMediaController(mediaController2)
+                    binding.videoView2.start()
+                    mediaController2.show(0)
+                    // Forze MediaController disappear after 3 seconds (3000 ms)
+
+                    val handler = Handler(Looper.getMainLooper())
+                    handler.postDelayed({
+                        mediaController2.hide()  // Hide MediaController after 3 seconds
+                    }, 3000)  // Timne in miliseconds
+                }
+
             }
             else -> {
-                binding.videoView1.visibility = View.VISIBLE
-                binding.videoView2.visibility = View.VISIBLE
                 binding.deleteVideo.visibility = View.VISIBLE
-                binding.videoView1.start()
-                binding.videoView2.start()
+                // Configure VideoView and make the controls visible when it's ready
+                binding.videoView1.visibility = View.VISIBLE
+
+                // Listener to know when the video is ready to play
+                binding.videoView1.setOnPreparedListener {
+
+                    val mediaController1 = MediaController(requireActivity())
+
+                    mediaController1.setAnchorView(binding.videoView1)
+
+                    mediaController1.scaleY = 0.5f  // vertical scale, 0.5 times its original size
+                    mediaController1.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
+
+
+                    // Apply customized background
+                    mediaController1.setBackgroundResource(R.drawable.rounded_media_controller)
+
+                    binding.videoView1.setMediaController(mediaController1)
+                    binding.videoView1.start()
+                    mediaController1.show(0)
+                    // Forze MediaController disappear after 3 seconds (3000 ms)
+
+                    val handler = Handler(Looper.getMainLooper())
+                    handler.postDelayed({
+                        mediaController1.hide()  // Hide MediaController after 3 seconds
+                    }, 3000)  // Timne in miliseconds
+                }
+                // Configure VideoView and make the controls visible when it's ready
+                binding.videoView2.visibility = View.VISIBLE
+
+                // Listener to know when the video is ready to play
+                binding.videoView2.setOnPreparedListener {
+
+                    val mediaController2 = MediaController(requireActivity())
+
+                    mediaController2.setAnchorView(binding.videoView2)
+
+                    mediaController2.scaleY = 0.5f  // vertical scale, 0.5 times its original size
+                    mediaController2.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
+
+
+                    // Apply customized background
+                    mediaController2.setBackgroundResource(R.drawable.rounded_media_controller)
+
+                    binding.videoView2.setMediaController(mediaController2)
+                    binding.videoView2.start()
+                    mediaController2.show(0)
+                    // Forze MediaController disappear after 3 seconds (3000 ms)
+
+                    val handler = Handler(Looper.getMainLooper())
+                    handler.postDelayed({
+                        mediaController2.hide()  // Hide MediaController after 3 seconds
+                    }, 3000)  // Timne in miliseconds
+                }
 
             }
         }
@@ -451,11 +555,11 @@ class HomeFragment : Fragment() {
         }else{
             binding.co2TV.setTextColor(Color.parseColor("#6F9F3A"))
             binding.co2TV.text = buildString {
-        append(co2)
-        append("kgCO2")
-        append("\n")
-        append(getString(R.string.congrats))
-    }
+                append(co2)
+                append("kgCO2")
+                append("\n")
+                append(getString(R.string.congrats))
+            }
 
         }
         if (compressedSize != null && initialSize != "") {
@@ -467,7 +571,7 @@ class HomeFragment : Fragment() {
                     finalS = finalSize.replace(".", "").replace(",", ".").toDouble()
                 }else {finalS = finalSize.replace(",", ".").toDouble()}
             }
-                var final = finalS
+            var final = finalS
             if ((compressedSize.contains("k") && initialSize.contains("M") )||(compressedSize.contains("M") && initialSize.contains("G") ) ||(compressedSize.contains("B") && initialSize.contains("k") )){
                 final=finalS/1000
             }
@@ -516,7 +620,7 @@ class HomeFragment : Fragment() {
             videoCompressionProgressReceiver,
             IntentFilter(Constants.WORK_PROGRESS_ACTION),
             Context.RECEIVER_EXPORTED
-       )
+        )
 
 // Finalization receiver register
         requireContext().registerReceiver(
@@ -626,7 +730,7 @@ class HomeFragment : Fragment() {
                     // Handle the error.
                 })
         }
-       loadAd()
+        loadAd()
         //checkNotificationPermission()
         checkCameraPermission()
         initUI()
@@ -634,7 +738,7 @@ class HomeFragment : Fragment() {
         videoView2 = binding.root.findViewById(R.id.videoView2)
         showLoader()
     }
-     private fun checkNotificationPermission() {
+    private fun checkNotificationPermission() {
 
         val notificationManager =
             requireActivity().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -835,7 +939,7 @@ class HomeFragment : Fragment() {
         exitProcess(0)
     }
 
-        private fun loadAd() {
+    private fun loadAd() {
         MobileAds.initialize(requireActivity()) {}
         val adRequest = AdRequest.Builder().build()
         mAdView = binding.root.findViewById(R.id.adView)
@@ -856,8 +960,8 @@ class HomeFragment : Fragment() {
 
             return true
         } else {
-                    showAlertDialog()
-                    return false
+            showAlertDialog()
+            return false
 
         }
 
@@ -893,7 +997,7 @@ class HomeFragment : Fragment() {
     // Here we are initialising everything and setting click listeners on the code . Like what will happen
     // When the user tap on pick video button and other buttons
     private fun initUI() = with(binding) {
-		reset.setOnClickListener {
+        reset.setOnClickListener {
             resetViews()
         }
 
@@ -917,32 +1021,32 @@ class HomeFragment : Fragment() {
         pickVideo.setOnClickListener {
 
 
-           // if (isBatteryOptimizationDisabled()) {
-                resetViews()
-                shareVideo.visibility = View.GONE
-                deleteVideo.visibility = View.GONE
-                when {
-                    ContextCompat.checkSelfPermission(
-                        requireContext(),
-                        Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED -> {
-                        val intent = Intent(Intent.ACTION_PICK)
-                        intent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
-                        val intent2 = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                        val chooser = Intent.createChooser(intent, "Some text here")
-                        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(intent2))
-                        resultLauncher.launch(chooser)                    }
-                    else -> {
-                        val intent = Intent(Intent.ACTION_PICK)
-                        intent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
-                        resultLauncher.launch(intent)
+            // if (isBatteryOptimizationDisabled()) {
+            resetViews()
+            shareVideo.visibility = View.GONE
+            deleteVideo.visibility = View.GONE
+            when {
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    val intent = Intent(Intent.ACTION_PICK)
+                    intent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
+                    val intent2 = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                    val chooser = Intent.createChooser(intent, "Some text here")
+                    chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(intent2))
+                    resultLauncher.launch(chooser)                    }
+                else -> {
+                    val intent = Intent(Intent.ACTION_PICK)
+                    intent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
+                    resultLauncher.launch(intent)
 
-                    }
                 }
+            }
 
 
 
-          //  }
+            //  }
 
         }
 
@@ -958,7 +1062,7 @@ class HomeFragment : Fragment() {
         }
         // Setting media controller to the video . So the user can pause and play the video . They will appear when user tap on video
         videoView.setMediaController(MediaController(requireActivity()))
-		videoView1.setMediaController(MediaController(requireActivity()))
+        videoView1.setMediaController(MediaController(requireActivity()))
         videoView2.setMediaController(MediaController(requireActivity()))
 
         checkboxAudio.setOnCheckedChangeListener{ checkboxAudio, _ ->
@@ -1032,8 +1136,8 @@ class HomeFragment : Fragment() {
         }
 
 
-      /*  with(spinner)
-        {setSelection(0, false)}*/
+        /*  with(spinner)
+          {setSelection(0, false)}*/
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>,
@@ -1042,12 +1146,12 @@ class HomeFragment : Fragment() {
                 id: Long
             ) {
                 if (view!=null){
-                selectedtype =typesSpinner[position]
-                val spinner2 =addSpinnerSpeed()
-                val spinner4 =addSpinnerCodec()
-                val spinner3 =addSpinnerResolution()
-                when (selectedtype) {
-                    getString(R.string.good) ->{
+                    selectedtype =typesSpinner[position]
+                    val spinner2 =addSpinnerSpeed()
+                    val spinner4 =addSpinnerCodec()
+                    val spinner3 =addSpinnerResolution()
+                    when (selectedtype) {
+                        getString(R.string.good) ->{
 
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
@@ -1059,60 +1163,60 @@ class HomeFragment : Fragment() {
                             binding.dataTV2.text=Html.fromHtml("<b>"+init40.toBigDecimal().setScale(2,RoundingMode.UP).toDouble()+" $unidades40"+"</b>")
                             binding.dataTV3.text="40% "+ getString(R.string.compression)
                         }
-                    getString(R.string.best) ->{
+                        getString(R.string.best) ->{
 
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
-                        binding.dataTV.visibility=View.VISIBLE
-                        binding.dataTV2.visibility=View.VISIBLE
-                        binding.dataTV3.visibility=View.VISIBLE
-                        binding.dataTV.text=getString(R.string.estimated_size)
-                        binding.dataTV2.text=Html.fromHtml("<b>"+init70.toBigDecimal().setScale(2,RoundingMode.UP).toDouble()+" $unidades70"+"</b>")
-                        binding.dataTV3.text="70% "+ getString(R.string.compression)
+                            binding.dataTV.visibility=View.VISIBLE
+                            binding.dataTV2.visibility=View.VISIBLE
+                            binding.dataTV3.visibility=View.VISIBLE
+                            binding.dataTV.text=getString(R.string.estimated_size)
+                            binding.dataTV2.text=Html.fromHtml("<b>"+init70.toBigDecimal().setScale(2,RoundingMode.UP).toDouble()+" $unidades70"+"</b>")
+                            binding.dataTV3.text="70% "+ getString(R.string.compression)
                         }
-                    getString(R.string.ultrafast) ->{
+                        getString(R.string.ultrafast) ->{
 
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
-                        binding.dataTV.visibility=View.VISIBLE
-                        binding.dataTV2.visibility=View.VISIBLE
-                        binding.dataTV3.visibility=View.VISIBLE
-                        binding.dataTV.text=getString(R.string.estimated_size)
-                        binding.dataTV2.text=Html.fromHtml("<b>"  +init75.toBigDecimal().setScale(2,RoundingMode.UP).toDouble() +" $unidades75"+"</b>")
-                        binding.dataTV3.text="75% "+ getString(R.string.compression)
-                                        }
+                            binding.dataTV.visibility=View.VISIBLE
+                            binding.dataTV2.visibility=View.VISIBLE
+                            binding.dataTV3.visibility=View.VISIBLE
+                            binding.dataTV.text=getString(R.string.estimated_size)
+                            binding.dataTV2.text=Html.fromHtml("<b>"  +init75.toBigDecimal().setScale(2,RoundingMode.UP).toDouble() +" $unidades75"+"</b>")
+                            binding.dataTV3.text="75% "+ getString(R.string.compression)
+                        }
 
-                    getString(R.string.custom_h) ->{
-                        dataTV.isVisible=false
-                        dataTV2.isVisible=false
-                        dataTV3.isVisible=false
+                        getString(R.string.custom_h) ->{
+                            dataTV.isVisible=false
+                            dataTV2.isVisible=false
+                            dataTV3.isVisible=false
 
+                        }
+                        getString(R.string.custom_l) ->{
+                            dataTV.isVisible=false
+                            dataTV2.isVisible=false
+                            dataTV3.isVisible=false
+
+
+                        }
+                        else ->{
+
+                            hideSpinner(spinner2)
+                            hideSpinner(spinner3)
+                            hideSpinner(spinner4)
+                            binding.dataTV.visibility=View.VISIBLE
+                            binding.dataTV2.visibility=View.VISIBLE
+                            binding.dataTV3.visibility=View.VISIBLE
+                            binding.dataTV.text=getString(R.string.estimated_size)
+                            binding.dataTV2.text=Html.fromHtml("<b>"  +init75.toBigDecimal().setScale(2,RoundingMode.UP).toDouble()+" $unidades75"+"</b>")
+                            binding.dataTV3.text="75% "+ getString(R.string.compression)
+                        }
                     }
-                    getString(R.string.custom_l) ->{
-                        dataTV.isVisible=false
-                        dataTV2.isVisible=false
-                        dataTV3.isVisible=false
 
 
-                    }
-                    else ->{
-
-                    hideSpinner(spinner2)
-                    hideSpinner(spinner3)
-                    hideSpinner(spinner4)
-                    binding.dataTV.visibility=View.VISIBLE
-                    binding.dataTV2.visibility=View.VISIBLE
-                    binding.dataTV3.visibility=View.VISIBLE
-                    binding.dataTV.text=getString(R.string.estimated_size)
-                    binding.dataTV2.text=Html.fromHtml("<b>"  +init75.toBigDecimal().setScale(2,RoundingMode.UP).toDouble()+" $unidades75"+"</b>")
-                    binding.dataTV3.text="75% "+ getString(R.string.compression)
-                }
-                }
-
-
-            }}
+                }}
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Code to perform some action when nothing is selected
             }
@@ -1121,7 +1225,7 @@ class HomeFragment : Fragment() {
         // Add Spinner to LinearLayout
 
 
-          //  binding.spinner.visibility=View.VISIBLE
+        //  binding.spinner.visibility=View.VISIBLE
 
 
 
@@ -1134,7 +1238,7 @@ class HomeFragment : Fragment() {
             binding.checkboxQuality.isChecked = false
             if (videoUrl != null) {
 
-				compressVideo.isVisible = false
+                compressVideo.isVisible = false
                 val value =
                     fileSize(videoUrl!!.length(requireActivity().contentResolver))
                 editor.putString(INITIAL_SIZE, value)
@@ -1144,7 +1248,7 @@ class HomeFragment : Fragment() {
                 if (videoView.isPlaying) {
                     videoView.pause()
                 }
-				if (videoView1.isPlaying) {
+                if (videoView1.isPlaying) {
                     videoView1.pause()
                 }
                 if (videoView2.isPlaying) {
@@ -1171,7 +1275,7 @@ class HomeFragment : Fragment() {
             } else {
 
                 // If picked video is null or video is not picked
-				binding.videoView.visibility = View.GONE
+                binding.videoView.visibility = View.GONE
                 binding.videoView1.visibility = View.GONE
                 binding.videoView2.visibility = View.GONE
                 Toast.makeText(context, Html.fromHtml("<font color='red' ><b>" +getString(R.string.select_video)+ "</b></font>"), Toast.LENGTH_SHORT).show()
@@ -1212,40 +1316,40 @@ class HomeFragment : Fragment() {
 
 
     }
-private fun resetViews() {
-    with(binding) {
+    private fun resetViews() {
+        with(binding) {
 
-        clearPref()
-        pickVideo.isVisible = true
-        spinner5.isVisible=false
-        spinner.isVisible=false
-        spinner2.isVisible=false
-        spinner3.isVisible=false
-        spinner4.isVisible=false
-        statsContainer.isVisible = false
-        videoView.isVisible = false
-        videoView1.isVisible = false
-        videoView2.isVisible = false
-        deleteVideo.isVisible=false
-        checkboxAudio.isVisible=false
-        shareVideo.isVisible=false
-        compressVideo.isVisible = false
-        reset.isVisible = false
-        dataTV.isVisible=false
-        dataTV2.isVisible=false
-        dataTV3.isVisible=false
-        rdOne.isChecked=false
-        binding.quality.visibility= View.GONE
-        binding.qualityDescription.visibility= View.GONE
-        binding.checkboxQuality.visibility= View.GONE
-        binding.quality.text =""
-        spinner.setSelection(0)
-        spinner5.setSelection(0)
-        /*spinner2.setSelection(0)
-        spinner3.setSelection(0)
-        spinner4.setSelection(0)*/
+            clearPref()
+            pickVideo.isVisible = true
+            spinner5.isVisible=false
+            spinner.isVisible=false
+            spinner2.isVisible=false
+            spinner3.isVisible=false
+            spinner4.isVisible=false
+            statsContainer.isVisible = false
+            videoView.isVisible = false
+            videoView1.isVisible = false
+            videoView2.isVisible = false
+            deleteVideo.isVisible=false
+            checkboxAudio.isVisible=false
+            shareVideo.isVisible=false
+            compressVideo.isVisible = false
+            reset.isVisible = false
+            dataTV.isVisible=false
+            dataTV2.isVisible=false
+            dataTV3.isVisible=false
+            rdOne.isChecked=false
+            binding.quality.visibility= View.GONE
+            binding.qualityDescription.visibility= View.GONE
+            binding.checkboxQuality.visibility= View.GONE
+            binding.quality.text =""
+            spinner.setSelection(0)
+            spinner5.setSelection(0)
+            /*spinner2.setSelection(0)
+            spinner3.setSelection(0)
+            spinner4.setSelection(0)*/
+        }
     }
-}
     private fun addSpinnerResolution():Spinner {
 
 
@@ -1507,9 +1611,9 @@ private fun resetViews() {
         }
         return false
     }
- private fun visibleViews() {
+    private fun visibleViews() {
 
-     with(binding) {
+        with(binding) {
             pickVideo.isVisible = true
             videoView.isVisible = true
             videoView1.visibility = View.GONE
@@ -1521,8 +1625,8 @@ private fun resetViews() {
             showViews=true
 
 
-     }
-		}
+        }
+    }
     private fun hideSpinner(spinner: Spinner) {
         spinner.visibility= View.GONE
 
@@ -1562,7 +1666,32 @@ If there is an error in the process, an error message is displayed to the user v
                 val videoUri: Uri? = result.data?.data
                 videoUri?.let {
                     videoView1.setVideoURI(it)
-                    videoView1.start()
+                    //binding.videoView1.visibility = View.VISIBLE
+
+                    // Listener to know when the video is ready to play
+                    binding.videoView1.setOnPreparedListener {
+
+                        val mediaController1 = MediaController(requireActivity())
+
+                        mediaController1.setAnchorView(binding.videoView1)
+
+                        mediaController1.scaleY = 0.5f  // vertical scale, 0.5 times its original size
+                        mediaController1.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
+
+
+                        // Apply customized background
+                        mediaController1.setBackgroundResource(R.drawable.rounded_media_controller)
+
+                        binding.videoView1.setMediaController(mediaController1)
+                        binding.videoView1.start()
+                        mediaController1.show(0)
+                        // Forze MediaController disappear after 3 seconds (3000 ms)
+
+                        val handler = Handler(Looper.getMainLooper())
+                        handler.postDelayed({
+                            mediaController1.hide()  // Hide MediaController after 3 seconds
+                        }, 3000)  // Timne in miliseconds
+                    }
                     binding.spinner.isVisible = true
                     binding.spinner5.isVisible = true
 
@@ -1632,14 +1761,38 @@ If there is an error in the process, an error message is displayed to the user v
 
 
                         }
-                        binding.videoView.visibility=View.VISIBLE
-                        // now set the video uri in the VideoView
+
+
+                    // Configure VideoView and make the controls visible when it's ready
+                        binding.videoView.visibility = View.VISIBLE
                         binding.videoView.setVideoURI(uri)
 
-                        // after successful retrieval of the video and properly
-                        // setting up the retried video uri in
-                        // VideoView, Start the VideoView to play that video
-                        binding.videoView.start()
+                    // Listener to know when the video is ready to play
+                        binding.videoView.setOnPreparedListener {
+
+                            val mediaController = MediaController(requireActivity())
+
+                            mediaController.setAnchorView(binding.videoView)
+
+                            mediaController.scaleY = 0.5f  // vertical scale, 0.5 times its original size
+                            mediaController.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
+
+
+                    // Apply customized background
+                            mediaController.setBackgroundResource(R.drawable.rounded_media_controller)
+
+                            binding.videoView.setMediaController(mediaController)
+                            binding.videoView.start()
+                            mediaController.show(0)
+                            // Forze MediaController disappear after 3 seconds (3000 ms)
+
+                            val handler = Handler(Looper.getMainLooper())
+                            handler.postDelayed({
+                                mediaController.hide()  // Hide MediaController after 3 seconds
+                            }, 3000)  // Timne in miliseconds
+                        }
+
+
                         initialSize = fileSize(videoUrl!!.length(requireActivity().contentResolver))
 
                         var initS=0.0
@@ -1681,7 +1834,7 @@ If there is an error in the process, an error message is displayed to the user v
                                 if (init75<1){
                                     init75 *= 1000
                                     unidades75 = "KB"
-                            }
+                                }
                                 if (init40<1){
                                     init40 *= 1000
                                     unidades40 = "KB"
