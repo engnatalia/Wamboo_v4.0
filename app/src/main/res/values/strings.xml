@@ -12,6 +12,7 @@
     <string name="ultrafast">Ultrafast</string>
     <string name="good">Good</string>
     <string name="best">Best but slow</string>
+    <string name="half">Reduce the size by half</string>
     <string name="custom_h">Custom (high quality: slower+less compression)</string>
     <string name="custom_l">Custom (low quality: faster+smaller)</string>
     <string name="ultrafast_description">"Fastest and smallest video, loosing some quality"</string>
@@ -83,8 +84,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
-    <string name="estimated_size">Size after compression, smaller than:</string>
-    <string name="compression">reduction (at least)</string>
+    <string name="estimated_size">Target size after compression, smaller than:</string>
+    <string name="compression">reduction (approx.)</string>
     <string name="compressed">compressed</string>
     <string name="background">Allow background compression</string>
     <string name="background2">Background compression already enabled!</string>
@@ -109,5 +110,5 @@
     <string name="corrupted_video">Unusual feature</string>
     <string name="cancel_compression">Stop Compression</string>
     <string name="video_h265_warning">"The video was compressed using the codec H.265, which is not compatible with all devices. If you had issues with the compressed video, use the H.264 codec."</string>
-    <string name="video_resolution_mismatch">"The video resolution is (%1$dpx), which is different that the selected one: (%2$dpx). This may cause issues with the video in some devices. If the compressed video can't be played, try the H.264 codec instead of H.265"</string>
+    <string name="video_resolution_mismatch">"The video resolution is (%1$dpx), which is different that the selected one: (%2$dpx). This may cause issues with the video in some devices. If the compressed video can't be played, try different compression settings"</string>
  </resources>

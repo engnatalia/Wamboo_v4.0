@@ -82,8 +82,8 @@
     <string name="delete_message">¿Seguro que quieres borrar la base de datos?</string>
     <string name="yes">Sí</string>
     <string name="no">No</string>
-    <string name="estimated_size">Tamaño tras comprimir, menos de:</string>
-    <string name="compression">de reducción (al menos)</string>
+    <string name="estimated_size">Tamaño objetivo tras comprimir, menor que:</string>
+    <string name="compression">de reducción (aproximadamente)</string>
     <string name="background">Habilita el funcionamiento en segundo plano</string>
     <string name="ok">OK</string>
     <string name="background2">Compresión en segundo plano ya habilitada</string>
@@ -108,7 +108,8 @@
     <string name="update_failed">Fallo en la actualización. Inténtalo de nuevo más tarde.</string>
     <string name="no_hevc">Este dispositivo no soporta H.265 (HEVC). Por favor, selecciona H.264</string>
     <string name="corrupted_video">Característica unusual</string>
-    <string name="video_resolution_mismatch">"Parece que la resolución del vídeo (%1$dpx) no coincide con la que se seleccionó: (%2$dpx). Esto puede causar problemas de reproducción en algunos dispositivos. Te recomendamos usar el codec H.264 en lugar de H.265."</string>
+    <string name="video_resolution_mismatch">"Parece que la resolución del vídeo (%1$dpx) no coincide con la que se seleccionó: (%2$dpx). Esto puede causar problemas de reproducción en algunos dispositivos. Te recomendamos usar otros parámetros de compresión."</string>
     <string name="video_h265_warning">"El vídeo está comprimido usando el codec H.265, que no es compatible con todos los dispositivos. Si el video comprimido no se puede reproducir, te recomendamos usar el codec H.264."</string>
     <string name="cancel_compression">Detener Compresión</string>
-  </resources>
+    <string name="half">Reduce el tamaño a la mitad</string>
+</resources>
