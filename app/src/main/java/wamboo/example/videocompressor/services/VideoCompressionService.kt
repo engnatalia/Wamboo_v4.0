@@ -69,7 +69,8 @@ class VideoCompressionService : Service() {
         val compressSpeed =intent?.getStringExtra(ForegroundWorker.COMPRESS_SPEED)
         val audio =intent?.getStringExtra(ForegroundWorker.VIDEO_AUDIO)
         val bitrate =intent?.getStringExtra(ForegroundWorker.BITRATE)
-        compressVideo(Uri.parse(videoUri), selectedtype.toString(),selectedformat.toString(),videoResolution, videoCodec, compressSpeed,audio, bitrate)
+        val fps =intent?.getStringExtra(ForegroundWorker.FPS)
+        compressVideo(Uri.parse(videoUri), selectedtype.toString(),selectedformat.toString(),videoResolution, videoCodec, compressSpeed,audio, bitrate,fps)
 
         return START_NOT_STICKY
     }
@@ -138,7 +139,8 @@ class VideoCompressionService : Service() {
         videoCodec: String?,
         compressSpeed: String?,
         audio: String?,
-        bitrate: String?
+        bitrate: String?,
+        fps: String?
 
     ) {
         val bitrateLong: Long? = bitrate?.toLongOrNull()
@@ -175,7 +177,23 @@ class VideoCompressionService : Service() {
                 MediaStore.Video.Media.DISPLAY_NAME,
                 filePrefix + System.currentTimeMillis() + fileExtn
             )
-
+        fun parseFractionalFps(fpsString: String?): Double? {
+            return fpsString?.let {
+                if (it.contains("/")) {
+                    val parts = it.split("/")
+                    if (parts.size == 2) {
+                        val numerator = parts[0].toDoubleOrNull()
+                        val denominator = parts[1].toDoubleOrNull()
+                        if (numerator != null && denominator != null && denominator != 0.0) {
+                            return numerator / denominator
+                        }
+                    }
+                    null
+                } else {
+                    it.toDoubleOrNull()
+                }
+            }
+        }
         when (fileExtn) {
             ".mkv"->{
                 valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mkv")
@@ -221,91 +239,99 @@ class VideoCompressionService : Service() {
         )
         val duration = mediaInformation.mediaInformation.formatProperties.getString("duration")
         val initialSize = fileSize(videoUri.length(contentResolver))
-       when (selectedtype) {
-            getString(R.string.ultrafast), getString(R.string.select_compression) -> {
-                /*command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                } -movflags faststart -c:v libx264 -crf 40 $audio -preset ultrafast $outPutSafeUri"*/
-                command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                }  -movflags +faststart -c:v libx264 -crf 40 $audio -preset ultrafast $outPutSafeUri"
-            }
-            "Ultrafast" -> {
-                command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                } -movflags +faststart -c:v libx264 -crf 40 $audio -preset ultrafast $outPutSafeUri"
-            }
-            getString(R.string.good) -> {
-                if (selectedformat=="3gp" || selectedformat=="avi")
-                { libx="libx264"}
-                else{ libx="libx265"}
-                command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                } -movflags +faststart -c:v $libx -crf 25 $audio -preset ultrafast $outPutSafeUri"
-            }
-            getString(R.string.best) -> {
-                if (selectedformat=="3gp"|| selectedformat=="avi")
-                { libx="libx264"}
-                else{ libx="libx265"}
-                command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                } -movflags +faststart -c:v $libx -crf 30 $audio -preset ultrafast $outPutSafeUri"
-            }
-            getString(R.string.custom_h) -> {
-                command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                } -movflags +faststart -c:v $videoCodec -crf 23 $audio -s $videoResolution -preset $compressSpeed $outPutSafeUri"
-            }
-           getString(R.string.half) -> {
-               if (bitrate != null) {
-                   if (isResolutionLower) {
-                   command = "-y -i ${
-                       FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)} " +
-                           "-movflags +faststart -c:v $videoCodec -crf 37 -b:v ${bitrate}k -maxrate ${bitrate}k " +
-                           "-bufsize ${bitrate.toLong() * 2}k -preset fast $outPutSafeUri"
-               } else {
-                       command = "-y -i ${
-                           FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)} " +
-                               "-movflags +faststart -c:v $videoCodec -crf 23 -b:v ${bitrate}k -maxrate ${bitrate}k " +
-                               "-bufsize ${bitrate.toLong() * 2}k -preset ultrafast $outPutSafeUri"
-               }
-               }
-               else  {
-                   command = "-y -i ${
-                       FFmpegKitConfig.getSafParameterForRead(
-                           applicationContext,
-                           videoUri
-                       )
-                   } -movflags +faststart -c:v $videoCodec -crf 40 $audio -s $videoResolution -preset $compressSpeed $outPutSafeUri"
-               }
-           }
-            else -> {
-                command = "-y -i ${
-                    FFmpegKitConfig.getSafParameterForRead(
-                        applicationContext,
-                        videoUri
-                    )
-                } -movflags +faststart -c:v $videoCodec -crf 40 $audio -s $videoResolution -preset $compressSpeed $outPutSafeUri"
+
+
+        val streams = mediaInformation.mediaInformation.streams
+        val videoWidthOrignal = mediaInformation.mediaInformation.streams[0].width
+        val videoHeightOriginal = mediaInformation.mediaInformation.streams[0].height
+        val isResolutionHigher = (videoWidth < videoWidthOrignal && videoHeight < videoHeightOriginal) 
+
+        var fpsaux: String? = null
+
+        // Select video stream (normally identified as "video")
+        for (stream in streams) {
+            if (stream.getStringProperty("codec_type") == "video") {
+
+                // Get the fps from the video stream
+                fpsaux = stream.getStringProperty("avg_frame_rate")
+
             }
         }
+
+
+        when (selectedtype) {
+            // Ultrafast preset for basic compression types
+            getString(R.string.ultrafast), getString(R.string.select_compression), "Ultrafast" -> {
+                val inputParameter = FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)
+                command = "-y -i $inputParameter -movflags +faststart -c:v libx264 -crf 40 $audio -preset ultrafast $outPutSafeUri"
+            }
+
+            // Good quality compression with format check for codec selection
+            getString(R.string.good) -> {
+                val inputParameter = FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)
+                val libx = if (selectedformat == "3gp" || selectedformat == "avi") "libx264" else "libx265"
+                command = "-y -i $inputParameter -movflags +faststart -c:v $libx -crf 25 $audio -preset ultrafast $outPutSafeUri"
+            }
+
+            // Best quality compression with format-based codec selection
+            getString(R.string.best) -> {
+                val inputParameter = FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)
+                val libx = if (selectedformat == "3gp" || selectedformat == "avi") "libx264" else "libx265"
+                command = "-y -i $inputParameter -movflags +faststart -c:v $libx -crf 30 $audio -preset ultrafast $outPutSafeUri"
+            }
+
+            // Custom high-quality compression with conditional FPS and resolution handling
+            getString(R.string.custom_h) -> {
+                val inputParameter = FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)
+                val includeFps = (parseFractionalFps(fpsaux) ?: 0.0) <= (parseFractionalFps(fps) ?: 0.0)
+
+                command = when {
+                    isResolutionLower && includeFps -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 37 $audio -r $fpsaux -preset $compressSpeed $outPutSafeUri"
+                    }
+                    isResolutionLower -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 37 $audio -preset $compressSpeed $outPutSafeUri"
+                    }
+                    isResolutionHigher && includeFps -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 23 $audio -s $videoResolution -r $fpsaux -preset $compressSpeed $outPutSafeUri"
+                    }
+                    isResolutionHigher -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 23 $audio -s $videoResolution -preset $compressSpeed $outPutSafeUri"
+                    }
+                    else -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 25 $audio -preset $compressSpeed $outPutSafeUri"
+                    }
+                }
+            }
+
+            // Half resolution with adjusted CRF or bitrate settings
+            getString(R.string.half) -> {
+                val inputParameter = FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)
+                command = when {
+                    bitrate != null && isResolutionLower -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 37 -preset fast $outPutSafeUri"
+                    }
+                    bitrate != null -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 23 -b:v ${bitrate}k -maxrate ${bitrate}k " +
+                                "-bufsize ${bitrate.toLong() * 2}k -preset ultrafast $outPutSafeUri"
+                    }
+                    isResolutionHigher -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 40 $audio -s $videoResolution -preset $compressSpeed $outPutSafeUri"
+                    }
+                    else -> {
+                        "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 40 $audio -preset $compressSpeed $outPutSafeUri"
+                    }
+                }
+            }
+
+            // Default case with optional resolution setting
+            else -> {
+                val inputParameter = FFmpegKitConfig.getSafParameterForRead(applicationContext, videoUri)
+                command = "-y -i $inputParameter -movflags +faststart -c:v $videoCodec -crf 40 $audio " +
+                        "${if (isResolutionHigher) "" else "-s $videoResolution "} -preset $compressSpeed $outPutSafeUri"
+            }
+        }
+
 
 
         Log.d("MyFFMPEG", command)

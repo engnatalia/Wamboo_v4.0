@@ -31,5 +31,6 @@ class ForegroundWorker(
         const val SELECTION_TYPE = "type"
         const val SELECTION_FORMAT = "format"
         const val BITRATE = "bitrate"
+        const val FPS = "fps"
     }
 }

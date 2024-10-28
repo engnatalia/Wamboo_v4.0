@@ -25,6 +25,7 @@ class VideoCompressionWorker(private val context: Context, workerParams: WorkerP
         val audio = Uri.parse(inputData.getString(ForegroundWorker.VIDEO_AUDIO))
         val selectedSpeed = Uri.parse(inputData.getString(ForegroundWorker.COMPRESS_SPEED))
         val bitrate = Uri.parse(inputData.getString(ForegroundWorker.BITRATE))
+        val fps = Uri.parse(inputData.getString(ForegroundWorker.FPS))
         val serviceIntent = Intent(context, VideoCompressionService::class.java)
         serviceIntent.putExtra(ForegroundWorker.VideoURI, videoUrl.toString())
         serviceIntent.putExtra(ForegroundWorker.SELECTION_TYPE, selectedMethod.toString())
@@ -34,6 +35,7 @@ class VideoCompressionWorker(private val context: Context, workerParams: WorkerP
         serviceIntent.putExtra(ForegroundWorker.VIDEO_AUDIO, audio.toString())
         serviceIntent.putExtra(ForegroundWorker.COMPRESS_SPEED, selectedSpeed.toString())
         serviceIntent.putExtra(ForegroundWorker.BITRATE, bitrate.toString())
+        serviceIntent.putExtra(ForegroundWorker.FPS, fps.toString())
         context.startForegroundService(serviceIntent)
         return Result.success()
     }
