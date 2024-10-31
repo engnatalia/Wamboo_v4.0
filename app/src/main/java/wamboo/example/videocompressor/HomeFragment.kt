@@ -66,6 +66,8 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 private const val REQUEST_PICK_VIDEO = 1
@@ -88,6 +90,8 @@ class HomeFragment : Fragment() {
     private lateinit var  videoWidth : String
     private var  videoResolution =""
     private var videoResolutionInit = ""
+    private var selectedFpsForCompression: String? = null
+
     private var  showSpeed =""
     private var  showCodec =""
     private var  videoCodec =""
@@ -444,6 +448,7 @@ class HomeFragment : Fragment() {
             binding.spinner5.visibility = View.GONE
             binding.spinner2.visibility = View.GONE
             binding.spinner3.visibility = View.GONE
+            binding.spinnerFps.visibility = View.GONE
             binding.spinner4.visibility = View.GONE
             binding.checkboxAudio.visibility = View.GONE
             binding.dataTV.visibility=View.GONE
@@ -816,38 +821,42 @@ class HomeFragment : Fragment() {
 
     }
     private fun checkCameraPermission() {
+        // Configura el lanzador para solicitar múltiples permisos
         val requestPermissionLauncher =
             registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                if (isGranted) {
-                    Log.i("Permission: ", "Granted")
-                } else {
-                    Log.i("Permission: ", "Denied")
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                permissions.entries.forEach { entry ->
+                    val permission = entry.key
+                    val isGranted = entry.value
+                    if (isGranted) {
+                        Log.i("Permission: ", "$permission Granted")
+                    } else {
+                        Log.i("Permission: ", "$permission Denied")
+                    }
                 }
             }
 
-        when {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED -> {
-                // You can use the API that requires the permission.
+        // Lista de permisos según la versión de Android
+        val permissionsToRequest = mutableListOf<String>()
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.CAMERA)
+        }
 
-
-                // You can directly ask for the permission.
-                // The registered ActivityResultCallback gets the result of this request.
-
-
-                requestPermissionLauncher.launch(
-                    Manifest.permission.CAMERA,
-                )
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)
+        } else {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
 
-
+        // Solicita los permisos si hay permisos en la lista
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -1191,12 +1200,16 @@ class HomeFragment : Fragment() {
                     val spinner2 =addSpinnerSpeed()
                     val spinner4 =addSpinnerCodec()
                     val spinner3 =addSpinnerResolution()
+                    val spinnerFPS = addSpinnerFps()
                     when (selectedtype) {
                         getString(R.string.good) ->{
 
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
+                            if (spinnerFPS != null) {
+                                hideSpinner(spinnerFPS)
+                            }
                             binding.dataTV.visibility=View.VISIBLE
                             binding.dataTV2.visibility=View.VISIBLE
                             binding.dataTV3.visibility=View.VISIBLE
@@ -1209,6 +1222,9 @@ class HomeFragment : Fragment() {
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
+                            if (spinnerFPS != null) {
+                                hideSpinner(spinnerFPS)
+                            }
                             binding.dataTV.visibility=View.VISIBLE
                             binding.dataTV2.visibility=View.VISIBLE
                             binding.dataTV3.visibility=View.VISIBLE
@@ -1221,6 +1237,9 @@ class HomeFragment : Fragment() {
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
+                            if (spinnerFPS != null) {
+                                hideSpinner(spinnerFPS)
+                            }
                             binding.dataTV.visibility=View.VISIBLE
                             binding.dataTV2.visibility=View.VISIBLE
                             binding.dataTV3.visibility=View.VISIBLE
@@ -1245,6 +1264,9 @@ class HomeFragment : Fragment() {
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
+                            if (spinnerFPS != null) {
+                                hideSpinner(spinnerFPS)
+                            }
                             binding.dataTV.visibility=View.VISIBLE
                             binding.dataTV2.visibility=View.VISIBLE
                             binding.dataTV3.visibility=View.VISIBLE
@@ -1271,6 +1293,9 @@ class HomeFragment : Fragment() {
                             hideSpinner(spinner2)
                             hideSpinner(spinner3)
                             hideSpinner(spinner4)
+                            if (spinnerFPS != null) {
+                                hideSpinner(spinnerFPS)
+                            }
                             binding.dataTV.visibility=View.VISIBLE
                             binding.dataTV2.visibility=View.VISIBLE
                             binding.dataTV3.visibility=View.VISIBLE
@@ -1392,6 +1417,7 @@ class HomeFragment : Fragment() {
             spinner.isVisible=false
             spinner2.isVisible=false
             spinner3.isVisible=false
+            spinnerFps.isVisible=false
             spinner4.isVisible=false
             statsContainer.isVisible = false
             videoView.isVisible = false
@@ -1417,234 +1443,224 @@ class HomeFragment : Fragment() {
             spinner4.setSelection(0)*/
         }
     }
-    private fun addSpinnerResolution():Spinner {
+    private fun addSpinnerFps(): Spinner? {
         val streams = mediaInformation.mediaInformation.streams
-        var bitrateaux: Long? = null
-        var fpsaux: String? = null
-        var videoRotation: Int? = null
-        var videoHeight_aux = ""
-        var videoWidth_aux = ""
-        var side : Long? = null
-        // Select video stream (normally identified as "video")
+        var fpsOriginal: Double? = null
+
+        // Extract the FPS from video stream
         for (stream in streams) {
             if (stream.getStringProperty("codec_type") == "video") {
-                // Get the bitrate from the video stream
-                bitrateaux = stream.getStringProperty("bit_rate")?.toLongOrNull()
-                // Get the fps from the video stream
-                fpsaux = stream.getStringProperty("avg_frame_rate")
-                fps=fpsaux
-                //Get the video rotation (if present)
-                side = stream.getStringProperty("side_data_list")?.toLongOrNull()
+                val fpsString = stream.getStringProperty("avg_frame_rate")
+                fpsOriginal = parseFractionalFps(fpsString)
+                break
             }
         }
 
-        if (bitrateaux != null) {
-            when {
-                // If the bitrate is between 200 and 400 kbps
-                bitrateaux in 200_000..400_000 -> {
-                    videoWidth_aux = 426.toString()
-                    videoHeight_aux = 240.toString()
-                }
-                // If the bitrate is between 400 and 800 kbps
-                bitrateaux in 400_000..800_000 -> {
-                    videoWidth_aux = 640.toString()
-                    videoHeight_aux = 360.toString()
-                }
-                // If the bitrate is between 800 and 1500 kbps
-                bitrateaux in 800_000..1_500_000 -> {
-                    videoWidth_aux = 1280.toString()
-                    videoHeight_aux = 720.toString()
-                }
-                // If the bitrate is between 4000 and 10000 kbps
-                bitrateaux in 4_000_000..10_000_000 -> {
-                    videoWidth_aux = 1920.toString()
-                    videoHeight_aux = 1080.toString()
-                }
-                else -> {
-                    // If bitrate is outside the specified ranges
-                    println("El bitrate no está dentro de los rangos especificados")
-                    videoWidth_aux = videoWidth
-                    videoHeight_aux = videoHeight
-                }
-            }
-        } else {
-            println("El bitrate es null")
-        }
-        if (side != null) {
-            videoRotation = side.toString().substringAfter("rotation\":").substringBefore('}').toIntOrNull()
-        }
-        // Adjust rotation
-        if (videoRotation != null ) {
-            // If rotation is 90 or 270 degress, swap width and height
-            if (videoRotation == 90 || videoRotation == 270) {
-                val temp = videoWidth_aux
-                videoWidth_aux = videoHeight_aux
-                videoHeight_aux = temp
-            }
+        // List of typical FPS options
+        val fpsOptions = listOf(30.0, 24.0, 20.0, 15.0, 10.0)
+        val filteredFpsOptions = fpsOptions.filter { it < (fpsOriginal ?: 0.0) }
+
+        // If the original FPS is the smallest or no options are available, don't create a spinner
+        if (fpsOriginal == null || filteredFpsOptions.isEmpty()) {
+            return null
         }
 
-        bitrate = bitrateaux.toString()
+        // Create the spinner options including the original FPS
+        val fpsSpinnerOptions = listOf(fpsOriginal) + filteredFpsOptions
+        val fpsLabels = fpsSpinnerOptions.map { "${it.toInt()} FPS" }
 
-// if width and height are smaller than original, update the values
-        if ((videoWidth_aux.toInt() < videoWidth.toInt() && videoHeight_aux.toInt() < videoHeight.toInt()) || (videoWidth_aux.toInt() < videoHeight.toInt() && videoHeight_aux.toInt() < videoWidth.toInt())) {
+        // Set up the spinner
+        val arrayAdapter = ArrayAdapter(requireContext(), R.layout.spinner_list, fpsLabels)
+        binding.spinnerFps.adapter = arrayAdapter
 
-            if (videoWidth <videoHeight && videoWidth_aux>videoHeight_aux) {
-                videoWidth = videoHeight_aux
-                videoHeight = videoWidth_aux
-            } else {
-                videoWidth = videoWidth_aux
-                videoHeight = videoHeight_aux
-            }
-        }
-        // Mapa que contiene la combinación de resoluciones y los bitrates máximos permitidos
-        val bitrateLimits = mapOf(
-            Pair("416", "234") to Pair(145000,24),
-            Pair("640", "360") to Pair(365000,24),
-            Pair("768", "432") to Pair(1100000,24),
-            Pair("960", "540") to Pair(2000000,fpsaux),
-            Pair("1280", "720") to Pair(4500000,fpsaux),
-            Pair("1920", "1080") to Pair(7800000, fpsaux)
-        )
-
-
-        fun findClosestResolution(width: Int, height: Int): Pair<String, String>? {
-            return bitrateLimits.keys.minByOrNull { (mapWidth, mapHeight) ->
-                // Calculamos la diferencia en área entre la resolución del video y las del mapa
-                val mapWidthInt = mapWidth.toIntOrNull() ?: 0
-                val mapHeightInt = mapHeight.toIntOrNull() ?: 0
-                Math.abs(mapWidthInt * mapHeightInt - width * height)
-            }
-        }
-        // Función para aplicar el límite de bitrate y retornar tanto el bitrate como el fps
-        fun applyBitrateLimit(width: String, height: String, currentBitrate: String): String {
-            val resolution = Pair(width, height)
-
-            // Check if there is an FPS limit for the specified resolution
-            bitrateLimits[resolution]?.let { (_, fpsValue) ->
-                return fpsValue.toString()
-            }
-
-            // Find closest resolution if exact resolution not found
-            val closestResolution = findClosestResolution(width.toInt(), height.toInt())
-            closestResolution?.let { (closestWidth, closestHeight) ->
-                val (_, fpsValue) = bitrateLimits[Pair(closestWidth.toString(), closestHeight.toString())] ?: return "30"
-                return fpsValue.toString()
-            }
-
-            // Default to 30 FPS if no match found
-            return "30"
-        }
-
-        // Función para verificar si el videoWidth o videoHeight coincide con la primera coordenada de algún par
-        fun checkWidthOrHeightMatch(width: String, height: String): String {
-            // Loop through the map to check if any dimension matches the first coordinate of the pair
-            for ((resolution, _) in bitrateLimits) {
-                if (resolution.first == width) {
-                    // Apply bitrate limit and get only FPS
-                    val fps = applyBitrateLimit(width, height, bitrate)
-                    return fps.toString()
-                } else if (resolution.first == height) {
-                    val fps = applyBitrateLimit(height, width, bitrate) // For rotated dimensions
-                    return fps.toString()
-                }
-            }
-
-            // Default to fpsaux if no match found
-            return fpsaux.toString()
-        }
-
-
-// Ejemplo de uso
-        val fps = checkWidthOrHeightMatch(videoWidth, videoHeight)
-
-        if (fps != fpsaux) {
-            println("FPS ha cambiado.")
-        } else {
-            println("Se mantiene el FPS original")
-        }
-
-
-
-
-        binding.spinner3.layoutParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        var resolutionSpinner =arrayOf("")
-        var resolutionValues =arrayOf("")
-
-        when (videoUrl) {
-            null -> {
-
-
-
-
-            }
-            else -> {
-
-                resolutionSpinner = arrayOf(
-                    getString(R.string.select_resolution),
-                    videoWidth + "x" + videoHeight + "(Original)",
-                    "${(round((videoWidth.toDouble() * 0.7)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.7)/2)*2).toInt()}" + " (70%)",
-                    "${(round((videoWidth.toDouble() * 0.5)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.5)/2)*2).toInt()}" + " (50%)",
-                    "${(round((videoWidth.toDouble() * 0.25)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.25)/2)*2).toInt()}" + " (25%)",
-                    "${(round((videoWidth.toDouble() * 0.05)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.05)/2)*2).toInt()}" + " (5%)"
-                )
-                resolutionValues = arrayOf(
-                    videoWidth + "x" + videoHeight,
-                    videoWidth + "x" + videoHeight,
-                    "${(round((videoWidth.toDouble() * 0.7)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.7)/2)*2).toInt()}",
-                    "${(round((videoWidth.toDouble() * 0.5)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.5)/2)*2).toInt()}",
-                    "${(round((videoWidth.toDouble() * 0.25)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.25)/2)*2).toInt()}",
-                    "${(round((videoWidth.toDouble() * 0.05)/2)*2).toInt()}" + "x" + "${(round((videoHeight.toDouble() * 0.05)/2)*2).toInt()}"
-                )
-
-            }
-        }
-
-        val arrayAdapter = ArrayAdapter(requireContext(), R.layout.spinner_list, resolutionSpinner)
-        binding.spinner3.adapter = arrayAdapter
-        /*with(binding.spinner3)
-        {setSelection(0, false)}*/
-        binding.spinner3.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spinnerFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>,
                 view: View?,
                 position: Int,
                 id: Long
             ) {
-                if (view!=null) {
-                    videoResolution = resolutionValues[position]
-
-                    when (position) {
-                        0 -> {
-                            Toast.makeText(
-                                requireActivity(),
-                                getString(R.string.no_selected_resolution),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        else -> {
-                            Toast.makeText(
-                                requireActivity(),
-                                getString(R.string.selected_resolution) + " " + resolutionSpinner[position],
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+                if (view != null) {
+                    val selectedFps = fpsSpinnerOptions[position]
+                    Toast.makeText(
+                        requireActivity(),
+                        getString(R.string.selected_fps) + " $selectedFps FPS",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // Set the selected FPS for further processing
+                    selectedFpsForCompression = selectedFps.toString()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) {
-                // Code to perform some action when nothing is selected
+                // No action needed
+            }
+        }
+        if (selectedFpsForCompression!= null){
+        fps = selectedFpsForCompression.toString()}
+        binding.spinnerFps.visibility = View.VISIBLE
+        return binding.spinnerFps
+    }
+
+    // Helper function to parse fractional FPS
+    private fun parseFractionalFps(fpsString: String?): Double? {
+        return fpsString?.let {
+            if (it.contains("/")) {
+                val parts = it.split("/")
+                if (parts.size == 2) {
+                    val numerator = parts[0].toDoubleOrNull()
+                    val denominator = parts[1].toDoubleOrNull()
+                    if (numerator != null && denominator != null && denominator != 0.0) {
+                        return numerator / denominator
+                    }
+                }
+                null
+            } else {
+                it.toDoubleOrNull()
+            }
+        }
+    }
+
+    private fun addSpinnerResolution(): Spinner {
+        val streams = mediaInformation.mediaInformation.streams
+
+        var bitrateaux: Long? = null
+        var fpsaux: String? = null
+        var videoRotation: Int? = null
+        var videoWidthAux = ""
+        var videoHeightAux = ""
+
+        // Extract video properties from stream
+        for (stream in streams) {
+            if (stream.getStringProperty("codec_type") == "video") {
+                bitrateaux = stream.getStringProperty("bit_rate")?.toLongOrNull()
+                fpsaux = stream.getStringProperty("avg_frame_rate")
+                fps = fpsaux
+                videoRotation =
+                    stream.getStringProperty("side_data_list")?.substringAfter("rotation\":")?.substringBefore('}')
+                        ?.toIntOrNull()
+            }
+        }
+
+        // Set default width and height based on bitrate range
+        if (bitrateaux != null) {
+            when (bitrateaux) {
+                in 200_000..400_000 -> {
+                    videoWidthAux = "426"
+                    videoHeightAux = "240"
+                }
+                in 400_000..800_000 -> {
+                    videoWidthAux = "640"
+                    videoHeightAux = "360"
+                }
+                in 800_000..1_500_000 -> {
+                    videoWidthAux = "1280"
+                    videoHeightAux = "720"
+                }
+                in 4_000_000..10_000_000 -> {
+                    videoWidthAux = "1920"
+                    videoHeightAux = "1080"
+                }
+                else -> {
+                    videoWidthAux = videoWidth
+                    videoHeightAux = videoHeight
+                }
+            }
+        }
+
+
+        // Adjust width and height if rotation is 90 or 270 degrees
+        if (videoRotation in listOf(90, 270)) {
+            videoWidthAux = videoHeightAux.also { videoHeightAux = videoWidthAux }
+        }
+
+        bitrate = bitrateaux.toString()
+
+        // Update width and height if the calculated dimensions are smaller than the original
+        if (videoWidthAux.toInt() < videoWidth.toInt() && videoHeightAux.toInt() < videoHeight.toInt()) {
+            if (videoWidth < videoHeight && videoWidthAux > videoHeightAux) {
+                videoWidth = videoHeightAux
+                videoHeight = videoWidthAux
+            } else {
+                videoWidth = videoWidthAux
+                videoHeight = videoHeightAux
+            }
+        }
+
+        // Map of resolutions and bitrate limits
+        val bitrateLimits = mapOf(
+            Pair("416", "234") to Pair(145000, 24),
+            Pair("640", "360") to Pair(365000, 24),
+            Pair("768", "432") to Pair(1100000, 24),
+            Pair("960", "540") to Pair(2000000, fpsaux),
+            Pair("1280", "720") to Pair(4500000, fpsaux),
+            Pair("1920", "1080") to Pair(7800000, fpsaux)
+        )
+
+        // Helper function to find closest resolution
+        fun findClosestResolution(width: Int, height: Int): Pair<String, String>? {
+            return bitrateLimits.keys.minByOrNull { (mapWidth, mapHeight) ->
+                val mapWidthInt = mapWidth.toIntOrNull() ?: 0
+                val mapHeightInt = mapHeight.toIntOrNull() ?: 0
+                abs(mapWidthInt * mapHeightInt - width * height)
+            }
+        }
+
+        // Apply bitrate limit and return FPS
+        fun applyBitrateLimit(width: String, height: String, currentBitrate: String): String {
+            val resolution = Pair(width, height)
+            bitrateLimits[resolution]?.let { (_, fpsValue) ->
+                return fpsValue.toString()
             }
 
+            val closestResolution = findClosestResolution(width.toInt(), height.toInt())
+            return closestResolution?.let { (closestWidth, closestHeight) ->
+                bitrateLimits[Pair(closestWidth.toString(), closestHeight.toString())]?.second.toString()
+            } ?: "30"
         }
-        // Add Spinner to LinearLayout
 
-        binding.spinner3.visibility=View.VISIBLE
+        // Check width or height match
+        val fps = applyBitrateLimit(videoWidth, videoHeight, bitrate)
+
+        if (fps != fpsaux) println("FPS has changed.") else println("Original FPS is maintained.")
+
+        // Set up spinner values for resolutions
+        val resolutionSpinner = arrayOf(
+            getString(R.string.select_resolution),
+            "$videoWidth x $videoHeight (Original)",
+            "${(videoWidth.toDouble() * 0.7).roundToInt()} x ${(videoHeight.toDouble() * 0.7).roundToInt()} (70%)",
+            "${(videoWidth.toDouble() * 0.5).roundToInt()} x ${(videoHeight.toDouble() * 0.5).roundToInt()} (50%)",
+            "${(videoWidth.toDouble() * 0.25).roundToInt()} x ${(videoHeight.toDouble() * 0.25).roundToInt()} (25%)",
+            "${(videoWidth.toDouble() * 0.05).roundToInt()} x ${(videoHeight.toDouble() * 0.05).roundToInt()} (5%)"
+        )
+
+        val resolutionValues = arrayOf(
+            "$videoWidth x $videoHeight",
+            "$videoWidth x $videoHeight",
+            "${(videoWidth.toDouble() * 0.7).roundToInt()} x ${(videoHeight.toDouble() * 0.7).roundToInt()}",
+            "${(videoWidth.toDouble() * 0.5).roundToInt()} x ${(videoHeight.toDouble() * 0.5).roundToInt()}",
+            "${(videoWidth.toDouble() * 0.25).roundToInt()} x ${(videoHeight.toDouble() * 0.25).roundToInt()}",
+            "${(videoWidth.toDouble() * 0.05).roundToInt()} x ${(videoHeight.toDouble() * 0.05).roundToInt()}"
+        )
+
+        // Configure spinner with resolutions
+        val arrayAdapter = ArrayAdapter(requireContext(), R.layout.spinner_list, resolutionSpinner)
+        binding.spinner3.adapter = arrayAdapter
+        binding.spinner3.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (view != null) {
+                    videoResolution = resolutionValues[position]
+                    val message = if (position == 0) getString(R.string.no_selected_resolution)
+                    else "${getString(R.string.selected_resolution)} ${resolutionSpinner[position]}"
+                    Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { /* No action needed */ }
+        }
+
+        binding.spinner3.visibility = View.VISIBLE
         return binding.spinner3
-
     }
+
     private fun addSpinnerSpeed():Spinner {
 
 

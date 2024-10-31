@@ -43,6 +43,7 @@
     <string name="title_information">Information</string>
     <string name="title_history">History</string>
     <string name="selected_resolution">Selected resolution:</string>
+    <string name="selected_fps">Selected FPS:</string>
     <string name="select_resolution">Select resolution</string>
     <string name="no_selected_resolution">No resolution selected</string>
     <string name="no_selected_speed">No speed selected</string>

@@ -112,4 +112,5 @@
     <string name="video_h265_warning">"El vídeo está comprimido usando el codec H.265, que no es compatible con todos los dispositivos. Si el video comprimido no se puede reproducir, te recomendamos usar el codec H.264."</string>
     <string name="cancel_compression">Detener Compresión</string>
     <string name="half">Reduce el tamaño a la mitad</string>
+    <string name="selected_fps">FPS seleccionado:</string>
 </resources>
