@@ -1355,7 +1355,8 @@ class HomeFragment : Fragment() {
                         .putString(ForegroundWorker.VIDEO_CODEC, videoCodec)
                         .putString(ForegroundWorker.VIDEO_AUDIO, audio)
                         .putString(ForegroundWorker.BITRATE, bitrate)
-                        .putString(ForegroundWorker.FPS, fps).build()
+                        .putString(ForegroundWorker.FPS, fps)
+                        .putString(ForegroundWorker.FPS, selectedFpsForCompression ).build()
 
                 // Create the work request
                 val myWorkRequest =
@@ -1443,6 +1444,7 @@ class HomeFragment : Fragment() {
             spinner4.setSelection(0)*/
         }
     }
+
     private fun addSpinnerFps(): Spinner? {
         val streams = mediaInformation.mediaInformation.streams
         var fpsOriginal: Double? = null
@@ -1465,13 +1467,14 @@ class HomeFragment : Fragment() {
             return null
         }
 
-        // Create the spinner options including the original FPS
+        // Create the spinner options including the default text and original FPS
         val fpsSpinnerOptions = listOf(fpsOriginal) + filteredFpsOptions
-        val fpsLabels = fpsSpinnerOptions.map { "${it.toInt()} FPS" }
+        val fpsLabels = listOf(getString(R.string.select_fps)) + fpsSpinnerOptions.map { "${it.roundToInt()} FPS" }
 
         // Set up the spinner
         val arrayAdapter = ArrayAdapter(requireContext(), R.layout.spinner_list, fpsLabels)
         binding.spinnerFps.adapter = arrayAdapter
+        binding.spinnerFps.setSelection(0) // Set default selection to "Selecciona FPS"
 
         binding.spinnerFps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -1479,27 +1482,40 @@ class HomeFragment : Fragment() {
                 view: View?,
                 position: Int,
                 id: Long
-            ) {
-                if (view != null) {
-                    val selectedFps = fpsSpinnerOptions[position]
+            ) {if (view != null) {
+                if (position == 0) {
+                    // First option is "Selecciona FPS", don't set any FPS yet
+                    selectedFpsForCompression = fpsOriginal.toString()
                     Toast.makeText(
                         requireActivity(),
-                        getString(R.string.selected_fps) + " $selectedFps FPS",
+                        getString(R.string.selected_fps) + " ${fpsOriginal?.roundToInt()} FPS (Default)",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    val selectedFps = fpsSpinnerOptions[position - 1] // Adjust for the offset
+                    Toast.makeText(
+                        requireActivity(),
+                        getString(R.string.selected_fps) + " ${selectedFps.roundToInt()} FPS",
                         Toast.LENGTH_SHORT
                     ).show()
                     // Set the selected FPS for further processing
                     selectedFpsForCompression = selectedFps.toString()
                 }
-            }
+            }}
+
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // No action needed
             }
         }
-        if (selectedFpsForCompression!= null){
-        fps = selectedFpsForCompression.toString()}
+
+        // Set the selected FPS as default if nothing else is chosen
+        if (selectedFpsForCompression != null) {
+            fps = selectedFpsForCompression.toString()
+        }
         binding.spinnerFps.visibility = View.VISIBLE
         return binding.spinnerFps
     }
+
 
     // Helper function to parse fractional FPS
     private fun parseFractionalFps(fpsString: String?): Double? {
@@ -1519,6 +1535,8 @@ class HomeFragment : Fragment() {
             }
         }
     }
+
+
 
     private fun addSpinnerResolution(): Spinner {
         val streams = mediaInformation.mediaInformation.streams
@@ -1987,18 +2005,18 @@ If there is an error in the process, an error message is displayed to the user v
 
 
 
-                            videoResolution= videoWidth + "x" + videoHeight
+                            videoResolution= videoWidth + " x " + videoHeight
                             videoResolutionInit = videoResolution
 
 
                         }
 
 
-                    // Configure VideoView and make the controls visible when it's ready
+                        // Configure VideoView and make the controls visible when it's ready
                         binding.videoView.visibility = View.VISIBLE
                         binding.videoView.setVideoURI(uri)
 
-                    // Listener to know when the video is ready to play
+                        // Listener to know when the video is ready to play
                         binding.videoView.setOnPreparedListener {
 
                             val mediaController = MediaController(requireActivity())
@@ -2009,7 +2027,7 @@ If there is an error in the process, an error message is displayed to the user v
                             mediaController.scaleX = 0.5f  // horizontal scale, 0.5 times its original size
 
 
-                    // Apply customized background
+                            // Apply customized background
                             mediaController.setBackgroundResource(R.drawable.rounded_media_controller)
 
                             binding.videoView.setMediaController(mediaController)

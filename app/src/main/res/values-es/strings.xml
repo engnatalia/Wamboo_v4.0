@@ -45,6 +45,7 @@
     <string name="no_selected_codec">Códec no seleccionado</string>
     <string name="selected_codec">Códec seleccionado:</string>
     <string name="select_codec">Selecciona códec</string>
+    <string name="select_fps">Selecciona FPS</string>
     <string name="select_speed">Selecciona velocidad</string>
     <string name="speed1">ultra-rápido</string>
     <string name="speed2">súper-rápido</string>
