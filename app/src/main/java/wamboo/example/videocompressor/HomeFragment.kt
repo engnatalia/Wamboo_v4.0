@@ -821,7 +821,7 @@ class HomeFragment : Fragment() {
 
     }
     private fun checkCameraPermission() {
-        // Configura el lanzador para solicitar múltiples permisos
+        // Configure the launcher to request several permissions
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
@@ -837,7 +837,7 @@ class HomeFragment : Fragment() {
                 }
             }
 
-        // Lista de permisos según la versión de Android
+        // Permissions' list depending on the Android version
         val permissionsToRequest = mutableListOf<String>()
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.CAMERA)
@@ -851,7 +851,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // Solicita los permisos si hay permisos en la lista
+        // Rquest permissions if there permissions in the list
         if (permissionsToRequest.isNotEmpty()) {
             requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
