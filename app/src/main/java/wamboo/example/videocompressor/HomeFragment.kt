@@ -1467,8 +1467,12 @@ class HomeFragment : Fragment() {
             return null
         }
 
-        // Create the spinner options including the default text and original FPS
-        val fpsSpinnerOptions = listOf(fpsOriginal) + filteredFpsOptions
+        // Only add fpsOriginal if it's not an exact match with any value in fpsOptions
+        val fpsSpinnerOptions = if (fpsOptions.contains(fpsOriginal.roundToInt().toDouble())) {
+            filteredFpsOptions
+        } else {
+            listOf(fpsOriginal) + filteredFpsOptions
+        }
         val fpsLabels = listOf(getString(R.string.select_fps)) + fpsSpinnerOptions.map { "${it.roundToInt()} FPS" }
 
         // Set up the spinner

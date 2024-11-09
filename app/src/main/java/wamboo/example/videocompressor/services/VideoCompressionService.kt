@@ -153,8 +153,9 @@ class VideoCompressionService : Service() {
 
 // Divide the resolution between width and height
         val resolutionParts = videoResolution?.split("x")
-        val videoWidth = resolutionParts!![0].toIntOrNull() ?: 0
-        val videoHeight = resolutionParts[1].toIntOrNull() ?: 0
+        val videoWidth = resolutionParts?.getOrNull(0)?.trim()?.toIntOrNull() ?: 0
+        val videoHeight = resolutionParts?.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+
 
 // Verify is the resolution is less than the "normal" value
         val isResolutionLower = (videoWidth < normalResolutionWidth && videoHeight < normalResolutionHeight) ||

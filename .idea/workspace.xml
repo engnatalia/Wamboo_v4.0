@@ -31,9 +31,10 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8657652c-175c-4ae3-8120-7be546b5f0c9" name="Changes" comment="added spinner to select FPS in custom options">
+    <list default="true" id="8657652c-175c-4ae3-8120-7be546b5f0c9" name="Changes" comment="translated some comments to English">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,7 +45,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\matlab\.android\avd\Pixel_6_Pro_API_30.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=R5CRB314NDL)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -122,37 +123,37 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;BundleExportedModule&quot;: &quot;VideoCompressor.app&quot;,
-    &quot;ExportBundle.BundlePathForVideoCompressor.app&quot;: &quot;D:\\HV\\Papers\\GOAL 1\\Paper 4\\Wamboo MVP\\Version3.3&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/HV_v2/Apps/Wamboo Cam/v2.0/WambooCam_v2.0&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Android App.app.executor": "Debug",
+    "BundleExportedModule": "VideoCompressor.app",
+    "ExportBundle.BundlePathForVideoCompressor.app": "D:\\HV\\Papers\\GOAL 1\\Paper 4\\Wamboo MVP\\Version3.3",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/HV_v2/Apps/Wamboo Cam/v2.0/WambooCam_v2.0",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;ExportApk.BuildVariants&quot;: [
-      &quot;release&quot;
+  "keyToStringList": {
+    "ExportApk.BuildVariants": [
+      "release"
     ],
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;C:\\Users\\matlab\\.gradle&quot;
+    "kotlin-gradle-user-dirs": [
+      "C:\\Users\\matlab\\.gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="PsdUISettings">
     <option name="LAST_EDITED_BUILD_TYPE" value="release" />
   </component>
@@ -601,7 +602,7 @@
       <option name="project" value="LOCAL" />
       <updated>1693842659048</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -620,7 +621,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
-    <MESSAGE value="added button to allow background compression" />
     <MESSAGE value="removed as many warnings as possible" />
     <MESSAGE value="added insta links to logo and planet image and email apps open when tapping on email address" />
     <MESSAGE value="background config more user-friendly" />
@@ -645,7 +645,8 @@
     <MESSAGE value="adjustments according to original resolution, bitrate and fps. code optimization in videoservice" />
     <MESSAGE value="added permissions to read videos and started working on fps spinner (not finished)" />
     <MESSAGE value="added spinner to select FPS in custom options" />
-    <option name="LAST_COMMIT_MESSAGE" value="added spinner to select FPS in custom options" />
+    <MESSAGE value="translated some comments to English" />
+    <option name="LAST_COMMIT_MESSAGE" value="translated some comments to English" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -677,7 +678,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
-          <line>163</line>
+          <line>164</line>
           <option name="timeStamp" value="252" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
@@ -687,12 +688,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
-          <line>487</line>
-          <option name="timeStamp" value="292" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
-          <line>285</line>
+          <line>286</line>
           <option name="timeStamp" value="297" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
@@ -702,46 +698,38 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>185</line>
-          <option name="timeStamp" value="300" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
           <line>205</line>
           <option name="timeStamp" value="301" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>184</line>
-          <option name="timeStamp" value="305" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
-          <line>288</line>
+          <line>289</line>
           <option name="timeStamp" value="306" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>1462</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="307" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>1485</line>
-          <option name="timeStamp" value="308" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
-          <line>1669</line>
-          <option name="timeStamp" value="309" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/HomeFragment.kt</url>
           <line>1358</line>
           <option name="timeStamp" value="310" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
+          <line>300</line>
+          <option name="timeStamp" value="311" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
+          <line>160</line>
+          <option name="timeStamp" value="313" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
+          <line>249</line>
+          <option name="timeStamp" value="314" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/wamboo/example/videocompressor/services/VideoCompressionService.kt</url>
+          <line>264</line>
+          <option name="timeStamp" value="315" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
