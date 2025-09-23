@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Natalia Molinero Mingorance
+ * Copyright (c) 2025 Natalia Molinero Mingorance
  * All rights reserved.
  */
 

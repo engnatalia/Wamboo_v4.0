@@ -1,8 +1,57 @@
-# Wamboo
+# 🌱 Wamboo (Open Source)
 
-Welcome to the Wamboo project! We appreciate your interest in contributing to our open-source project. Before you get started, please follow these guidelines.
+Eco-friendly **video compressor** 📸🎥  
+Designed to help users **save storage, reduce power usage, and lower their environmental footprint** 🌍
 
-## Contributing
+Now released as **open source** so the community can improve and keep it alive 🚀
+
+---
+
+## ⚠️ Why Open Source?
+
+I had to unpublish Wamboo Eco-compressor from Google Play because of new requirements from Google and dependencies:
+
+1. **16 KB memory page support**
+   - All apps targeting Android 15+ must support 16 KB page sizes.
+   - My last production build did not.
+
+2. **Target API 35 (Android 15)**
+   - Mandatory starting **Nov 1, 2025**.
+   - Apps not targeting Android 15 or higher cannot be updated.
+
+3. **FFmpeg-Kit discontinued**
+   - The library I used for video processing was retired due to **legal risks** and **maintenance costs**.
+   - [More info & solutions here](https://proandroiddev.com/ffmpeg-kit-16-kb-page-size-in-android-d522adc5efa2#da91).
+
+Because of all this, and since I had neither the **time to do it myself** nor the **resources to pay developers**, I couldn’t keep updating the app.  
+👉 Instead of letting it die, I’m sharing the source so developers can take over 💚
+
+---
+
+## ✨ Features (Current)
+
+- Simple **eco video compressor & camera** 📸🎥
+- Helps save storage & reduce power consumption 🌱
+- Option to **save space without losing video quality** 💾✨
+
+---
+
+## 💡 Ideas for Future Development
+
+If you want to contribute, here are directions I envisioned:
+- Replace **FFmpeg-kit with alternatives**
+- Update to **target API 35 (Android 15)**
+- Ensure support for **16 KB memory pages** 🛠️
+- Improve UI & design ✨
+- Add new compression options 🔧
+- Support new eco-compression methods ⚡
+- Add new metrics for **measuring power consumption and associated pollution** ⚡🌍
+- Or simply… add **any improvements you imagine** 🚀
+
+---
+
+## 🛠️ How You Can Help
+
 
 To contribute to this project, follow these steps:
 
@@ -11,7 +60,7 @@ To contribute to this project, follow these steps:
 2. **Clone the Repository**: In your terminal, run the following command to clone your forked repository to your local machine:
 
    ```bash
-   git clone https://github.com/engnatalia/Wamboo_v3.2.git
+   git clone https://github.com/engnatalia/Wamboo_v4.git
    ```
 
 3. **Create a New Branch**: Create a new branch for your contribution using the following command:
